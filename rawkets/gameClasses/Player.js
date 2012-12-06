@@ -5,6 +5,19 @@ var Player = IgeEntity.extend({
 	local: false,
 	target: null,
 
+	moveStates: {
+		idle: 2,
+		thrust: 3
+	},
+
+	moveState: null,
+
+	turretAnchors: [
+		{x: 0, y: -76},
+		{x: 0, y: -12},
+		{x: 0, y: 64}
+	],
+
 	init: function (id) {
 		this._super();
 
@@ -14,11 +27,28 @@ var Player = IgeEntity.extend({
 
 		this.drawBounds(false);
 
+		this.moveState = this.moveStates.idle;
+
+		// Create turrets
+		for (var i = 0; i < this.turretAnchors.length; i++) {
+			var turretAnchor = this.turretAnchors[i];
+			
+			// Create turret object
+			var turret = new PlayerTurret()
+				.id(this.id() + '-turret' + i)
+				.width(10)
+				.height(16)
+				.translateTo(turretAnchor.x, turretAnchor.y, 0)
+				.mount(this);
+		}
+
 		if (ige.isServer) {
 			this.addComponent(IgeVelocityComponent);
 		}
 
 		if (!ige.isServer) {
+			self.layer(ige.client.entityLayers.ship);
+
 			self.addComponent(IgeAnimationComponent);
 			self.texture(ige.client.gameTextures.ship)
 			.cellById('idle')
@@ -30,11 +60,11 @@ var Player = IgeEntity.extend({
 
 			// How do I only make this fire on the client when moving?
 			// Could set a "moving" flag, or perhaps stream the animation state? – Ask Rob
-			self.animation.select('thrust');
+			//self.animation.select('thrust');
 		}
 
 		// Define the data sections that will be included in the stream
-		this.streamSections(['transform', 'score']);
+		this.streamSections(['transform', 'score', 'moveState']);
 	},
 
 	/**
@@ -49,15 +79,26 @@ var Player = IgeEntity.extend({
 	 */
 	streamSectionData: function (sectionId, data) {
 		// Check if the section is one that we are handling
-		if (sectionId === 'score') {
+		// if (sectionId === 'score') {
+		// 	// Check if the server sent us data, if not we are supposed
+		// 	// to return the data instead of set it
+		// 	if (data) {
+		// 		// We have been given new data!
+		// 		this._score = data;
+		// 	} else {
+		// 		// Return current data
+		// 		return this._score;
+		// 	}
+		// } else 
+		if (sectionId === 'moveState') {
 			// Check if the server sent us data, if not we are supposed
 			// to return the data instead of set it
 			if (data) {
 				// We have been given new data!
-				this._score = data;
+				this.moveState = data;
 			} else {
 				// Return current data
-				return this._score;
+				return this.moveState;
 			}
 		} else {
 			// The section was not one that we handle here, so pass this
@@ -75,6 +116,9 @@ var Player = IgeEntity.extend({
 	tick: function (ctx) {
 		/* CEXCLUDE */
 		if (ige.isServer) {
+			// Assume idle state
+			this.moveState = this.moveStates.idle;
+
 			// If player is further than 10 pixels away from the movement target
 			if (this.target) {
 				if (Math.abs(this._translate.x - this.target.x) > 10 || Math.abs(this._translate.y - this.target.y) > 10) {
@@ -91,98 +135,38 @@ var Player = IgeEntity.extend({
 
 					// 2. Rotate slightly in direction of new target
 					var rotation = 0;
-					if (relativeAngle > 0.05 && relativeAngle < Math.PI) {
-						rotation = 0.001 * ige._tickDelta;
-					} else if (relativeAngle < -0.05 && relativeAngle > -Math.PI) {
-						rotation = -0.001 * ige._tickDelta;
+					if (relativeAngle > 0.005 && relativeAngle < Math.PI) {
+						rotation = 0.0005 * ige._tickDelta;
+					} else if (relativeAngle < -0.005 && relativeAngle > -Math.PI) {
+						rotation = -0.0005 * ige._tickDelta;
 					}
 					this.rotateBy(0, 0, rotation);
 
-					if (relativeAngle > -0.05 && relativeAngle < 0.05) {
+					if (relativeAngle > -0.005 && relativeAngle < 0.005) {
 						this.rotateBy(0, 0, relativeAngle);
 						correctAngle = true;
 					}
 
 					if (correctAngle) {
 						this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.05);
+						this.moveState = this.moveStates.thrust;
 					}
 				} else {
 					this.velocity.x(0);
 					this.velocity.y(0);
+					this.moveState = this.moveStates.idle;
 				}
 			}
-
-			// if (this.controls.left) {
-			// 	this.rotateBy(0, 0, Math.radians(-0.2 * ige._tickDelta));
-			// }
-
-			// if (this.controls.right) {
-			// 	this.rotateBy(0, 0, Math.radians(0.2 * ige._tickDelta));
-			// }
-
-			// if (this.controls.thrust) {
-			// 	this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.1);
-			// } else {
-			//	this.velocity.x(0);
-			//	this.velocity.y(0);
-			//}
 		}
 		/* CEXCLUDE */
 
 		if (!ige.isServer) {
-			// if (ige.input.actionState('left')) {
-			// 	if (!this.controls.left) {
-			// 		// Record the new state
-			// 		this.controls.left = true;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlLeftDown');
-			// 	}
-			// } else {
-			// 	if (this.controls.left) {
-			// 		// Record the new state
-			// 		this.controls.left = false;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlLeftUp');
-			// 	}
-			// }
-
-			// if (ige.input.actionState('right')) {
-			// 	if (!this.controls.right) {
-			// 		// Record the new state
-			// 		this.controls.right = true;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlRightDown');
-			// 	}
-			// } else {
-			// 	if (this.controls.right) {
-			// 		// Record the new state
-			// 		this.controls.right = false;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlRightUp');
-			// 	}
-			// }
-
-			// if (ige.input.actionState('thrust')) {
-			// 	if (!this.controls.thrust) {
-			// 		// Record the new state
-			// 		this.controls.thrust = true;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlThrustDown');
-			// 	}
-			// } else {
-			// 	if (this.controls.thrust) {
-			// 		// Record the new state
-			// 		this.controls.thrust = false;
-
-			// 		// Tell the server about our control change
-			// 		ige.network.send('playerControlThrustUp');
-			// 	}
-			// }
+			if (this.moveState == 2) {
+				this.animation.stop('thrust');
+				this.cellById('idle');
+			} else if (this.moveState == 3) {
+				this.animation.select('thrust');
+			}
 		}
 
 		// Call the IgeEntity (super-class) tick() method

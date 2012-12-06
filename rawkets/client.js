@@ -3,6 +3,11 @@ var Client = IgeClass.extend({
 
 	localPlayer: null,
 
+	entityLayers: {
+		ship: 0,
+		bullet: 1
+	},
+
 	init: function () {
 		//ige.timeScale(0.1);
 		ige.showStats(1);
@@ -13,11 +18,14 @@ var Client = IgeClass.extend({
 		
 		// Load the textures we want to use
 		self.gameTextures = {
+			background: new IgeTexture('./assets/background.png'),
 			ship: new IgeSpriteSheet('./assets/player.png', [
 				[0, 364, 222, 364, 'thrust1'],
 				[0, 0, 222, 364, 'thrust2'],
 				[222, 364, 222, 364, 'idle']
-			])
+			]),
+			turret: new IgeTexture('./assets/turret.png'),
+			bullet: new IgeTexture('./assets/plasma.png')
 		};
 
 		// Enable networking
@@ -50,11 +58,17 @@ var Client = IgeClass.extend({
 							// is created because of the incoming stream data
 							.stream.on('entityCreated', function (entity) {
 								self.log('Stream entity created with ID: ' + entity.id());
-
 							});
 
 						self.mainScene = new IgeScene2d()
 							.id('mainScene');
+
+						self.backgroundScene = new IgeScene2d()
+							.id('backgroundScene')
+							.layer(-9999)
+							.backgroundPattern(self.gameTextures.background, 'repeat', true)
+							.ignoreCamera(true) // We want the scene to remain static
+							.mount(self.mainScene);
 
 						// Create the scene
 						self.scene1 = new IgeScene2d()
@@ -74,6 +88,7 @@ var Client = IgeClass.extend({
 							.autoSize(true)
 							.scene(self.mainScene)
 							.drawBounds(false)
+							.drawMouse(true)
 							.mount(ige);
 
 						// Define our player controls
