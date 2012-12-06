@@ -8,8 +8,9 @@ var ClientNetworkEvents = {
 	 * @private
 	 */
 	_onPlayerEntity: function (data) {
-		if (ige.$(data)) {
-			ige.client.vp1.camera.trackTranslate(ige.$(data), 50);
+		var self = this;
+		if (self.localPlayer) {
+			ige.client.vp1.camera.trackTranslate(self.localPlayer, 50);
 
 			// Set the time stream UI entity to monitor our player entity
 			// time stream data
@@ -19,15 +20,21 @@ var ClientNetworkEvents = {
 			// stream so lets ask the stream to tell us when it creates a
 			// new entity and then check if that entity is the one we
 			// should be tracking!
-			var self = this;
 			self._eventListener = ige.network.stream.on('entityCreated', function (entity) {
 				if (entity.id() === data) {
+					// Store reference to local player
+					self.localPlayer = ige.$(data);
+					self.localPlayer.local = true;
+
+					// Start local input for player
+					self.localPlayer.initInput();
+
 					// Tell the camera to track out player entity
-					ige.client.vp1.camera.trackTranslate(ige.$(data), 50);
+					ige.client.vp1.camera.trackTranslate(self.localPlayer, 50);
 
 					// Set the time stream UI entity to monitor our player entity
 					// time stream data
-					ige.client.tsVis.monitor(ige.$(data));
+					ige.client.tsVis.monitor(self.localPlayer);
 
 					// Turn off the listener for this event now that we
 					// have found and started tracking our player entity

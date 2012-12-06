@@ -34,29 +34,36 @@ var ServerNetworkEvents = {
 		}
 	},
 
-	_onPlayerLeftDown: function (data, clientId) {
-		ige.server.players[clientId].controls.left = true;
-	},
-
-	_onPlayerLeftUp: function (data, clientId) {
-		ige.server.players[clientId].controls.left = false;
-	},
-
-	_onPlayerRightDown: function (data, clientId) {
-		ige.server.players[clientId].controls.right = true;
-	},
-
-	_onPlayerRightUp: function (data, clientId) {
-		ige.server.players[clientId].controls.right = false;
-	},
-
-	_onPlayerThrustDown: function (data, clientId) {
-		ige.server.players[clientId].controls.thrust = true;
-	},
-
-	_onPlayerThrustUp: function (data, clientId) {
-		ige.server.players[clientId].controls.thrust = false;
+	_onPlayerTarget: function(data, clientId) {
+		var player = ige.server.players[clientId];
+		if (player) {
+			player.target = {x: data.x, y: data.y};
+		}
 	}
+
+	// _onPlayerLeftDown: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.left = true;
+	// },
+
+	// _onPlayerLeftUp: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.left = false;
+	// },
+
+	// _onPlayerRightDown: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.right = true;
+	// },
+
+	// _onPlayerRightUp: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.right = false;
+	// },
+
+	// _onPlayerThrustDown: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.thrust = true;
+	// },
+
+	// _onPlayerThrustUp: function (data, clientId) {
+	// 	ige.server.players[clientId].controls.thrust = false;
+	// }
 };
 
 if (typeof(module) !== 'undefined' && typeof(module.exports) !== 'undefined') { module.exports = ServerNetworkEvents; }

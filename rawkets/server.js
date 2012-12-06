@@ -23,13 +23,15 @@ var Server = IgeClass.extend({
 						// Create some network commands we will need
 						ige.network.define('playerEntity', self._onPlayerEntity);
 
-						ige.network.define('playerControlLeftDown', self._onPlayerLeftDown);
-						ige.network.define('playerControlRightDown', self._onPlayerRightDown);
-						ige.network.define('playerControlThrustDown', self._onPlayerThrustDown);
+						ige.network.define('playerTarget', self._onPlayerTarget);
 
-						ige.network.define('playerControlLeftUp', self._onPlayerLeftUp);
-						ige.network.define('playerControlRightUp', self._onPlayerRightUp);
-						ige.network.define('playerControlThrustUp', self._onPlayerThrustUp);
+						// ige.network.define('playerControlLeftDown', self._onPlayerLeftDown);
+						// ige.network.define('playerControlRightDown', self._onPlayerRightDown);
+						// ige.network.define('playerControlThrustDown', self._onPlayerThrustDown);
+
+						// ige.network.define('playerControlLeftUp', self._onPlayerLeftUp);
+						// ige.network.define('playerControlRightUp', self._onPlayerRightUp);
+						// ige.network.define('playerControlThrustUp', self._onPlayerThrustUp);
 
 						ige.network.on('connect', self._onPlayerConnect); // Defined in ./gameClasses/ServerNetworkEvents.js
 						ige.network.on('disconnect', self._onPlayerDisconnect); // Defined in ./gameClasses/ServerNetworkEvents.js

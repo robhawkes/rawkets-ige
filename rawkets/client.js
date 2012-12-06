@@ -1,26 +1,33 @@
 var Client = IgeClass.extend({
 	classId: 'Client',
 
+	localPlayer: null,
+
 	init: function () {
 		//ige.timeScale(0.1);
 		ige.showStats(1);
 
-		// Load our textures
+		ige.globalSmoothing(true);
+
 		var self = this;
+		
+		// Load the textures we want to use
+		self.gameTextures = {
+			ship: new IgeSpriteSheet('./assets/player.png', [
+				[0, 364, 222, 364, 'thrust1'],
+				[0, 0, 222, 364, 'thrust2'],
+				[222, 364, 222, 364, 'idle']
+			])
+		};
 
 		// Enable networking
 		ige.addComponent(IgeNetIoComponent);
 
 		// Implement our game methods
-		this.implement(ClientNetworkEvents);
+		self.implement(ClientNetworkEvents);
 
 		// Create the HTML canvas
 		ige.createFrontBuffer(true);
-
-		// Load the textures we want to use
-		this.textures = {
-			ship: new IgeTexture('./assets/PlayerTexture.js')
-		};
 
 		ige.on('texturesLoaded', function () {
 			// Ask the engine to start
@@ -70,9 +77,9 @@ var Client = IgeClass.extend({
 							.mount(ige);
 
 						// Define our player controls
-						ige.input.mapAction('left', ige.input.key.left);
-						ige.input.mapAction('right', ige.input.key.right);
-						ige.input.mapAction('thrust', ige.input.key.up);
+						// ige.input.mapAction('left', ige.input.key.left);
+						// ige.input.mapAction('right', ige.input.key.right);
+						// ige.input.mapAction('thrust', ige.input.key.up);
 
 						// Ask the server to create an entity for us
 						ige.network.send('playerEntity');
