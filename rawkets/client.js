@@ -112,7 +112,7 @@ var Client = IgeClass.extend({
 							.id('vp1')
 							.autoSize(true)
 							.scene(self.mainScene)
-							.drawBounds(false)
+							.drawBounds(true)
 							.drawMouse(true)
 							.mount(ige);
 

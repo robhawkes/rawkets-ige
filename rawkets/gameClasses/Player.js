@@ -12,8 +12,8 @@ var Player = IgeEntity.extend({
 
 	turretAnchors: [
 		{x: 0, y: -76},
-		//{x: 0, y: -12},
-		//{x: 0, y: 64}
+		{x: 0, y: -12},
+		{x: 0, y: 64}
 	],
 
 	team: 0,
@@ -24,8 +24,6 @@ var Player = IgeEntity.extend({
 		this.id(id);
 
 		var self = this;
-
-		this.drawBounds(false);
 
 		this.moveState = this.moveStates.idle;
 

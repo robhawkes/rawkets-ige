@@ -99,8 +99,8 @@ var PlayerTurret = IgeEntity.extend({
 				this.rotateTo(this._rotate.x, this._rotate.y, angle);
 
 				// If within range, and when ready, fire weapon
-				//if (Date.now() - this.lastFireTime > 300 + Math.random()*700) {
-				if (Date.now() - this.lastFireTime > 1000) {
+				if (Date.now() - this.lastFireTime > 300 + Math.random()*700) {
+				//if (Date.now() - this.lastFireTime > 1000) {
 					var bullet = new PlayerBullet()
 						// .id(this.id() + '-bullet'))
 						.width(48)

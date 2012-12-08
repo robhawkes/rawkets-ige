@@ -86,14 +86,14 @@ var PlayerBullet = IgeEntity.extend({
 				var entity = entities[i];
 
 				// Skip if this entity
-				if (this.owner.id() === entity.id()) {
-					continue;
-				}
+				// if (this.owner.id() === entity.id()) {
+				// 	continue;
+				// }
 
-				// Skip if owned by the current entity
-				if (this.owner._parent.id() === entity.id()) {
-					continue;
-				}
+				// // Skip if owned by the current entity
+				// if (this.owner._parent.id() === entity.id()) {
+				// 	continue;
+				// }
 
 				// // Skip if owned by the same entity
 				// if (entity._parent && owner._parent.id() === entity._parent.id()) {
@@ -101,17 +101,31 @@ var PlayerBullet = IgeEntity.extend({
 				// }
 
 				// Skip if on the same team
-				if (this.owner.team === entity.team) {
-					continue;
-				}
+				// if (this.owner.team === entity.team) {
+				// 	continue;
+				// }
 
 				//console.log(this.owner.group(), entity.group(), targetGroup);
 
+				// Ideally want to use AABB boxes for first-pass collision checks but
+				// it seems they aren't in global worldspace, causing funkiness
+				// Talk to Rob about getting around this
+				// Update: Using relative translate seems to work fine
 				var aabb = entity.aabb();
-				if (aabb.xyInside(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5])) {
+				//if (aabb.xyInside(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5])) {
+				if (aabb.xyInside(this._translate.x, this._translate.y)) {
 					this.destroy();
-					console.log("Hit");
+					break;
 				}
+
+				// In the meantime, use a distance-based check for first-pass collision checks
+				// //var distance = Math.distance(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
+				// var distance = Math.distance(this._translate.x, this._translate.y, entity._translate.x, entity._translate.y);
+				// //console.log(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
+				// if (distance < 100) {
+				// 	this.destroy();
+				// 	break;
+				// }
 			}
 
 			// Check fine-level collision using rotated rectangles
