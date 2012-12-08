@@ -80,24 +80,90 @@ var PlayerTurret = IgeEntity.extend({
 		/* CEXCLUDE */
 
 		if (!ige.isServer) {
-			//this.rotateToPoint(ige._currentViewport.mousePos());
-			this.rotateBy(0, 0, 0.0005 * ige._tickDelta);
+			// Find nearest enemy ship
+			var targetGroup = (this._parent.group() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
+			var targetEntity = this.findTargetEntityByType(targetGroup, this._parent);
 
-			if (Date.now() - this.lastFireTime > 1000) {
-				var bullet = new PlayerBullet()
-					// .id(this.id() + '-bullet'))
-					.width(48)
-					.height(48)
-					.translateTo(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], 0)
-					.rotateTo(this._parent._rotate.x + this._rotate.x, this._parent._rotate.y + this._rotate.y, this._parent._rotate.z + this._rotate.z)
-					.lifeSpan(1000)
-					.mount(ige.client.scene1);
-				this.lastFireTime = Date.now();
+			if (targetEntity) {
+				// Rotate towards it if within range
+				var diffX = this._worldMatrix.matrix[2] - targetEntity._worldMatrix.matrix[2];
+				var diffY = this._worldMatrix.matrix[5] - targetEntity._worldMatrix.matrix[5];
+				var angle = Math.atan2(diffY, diffX) + Math.radians(270) - this._parent._rotate.z;
+				// var angle = this.angleTo(targetEntity);
+
+				// // Fuzz the angle (probably won't be necessary when using slow rotation)
+				//angle += 0.05 - Math.random()*0.1;
+				
+				// this.currentAnim.angle = angle;
+				//this.rotateBy(0, 0, 0.0005 * ige._tickDelta);
+				this.rotateTo(this._rotate.x, this._rotate.y, angle);
+
+				// If within range, and when ready, fire weapon
+				//if (Date.now() - this.lastFireTime > 300 + Math.random()*700) {
+				if (Date.now() - this.lastFireTime > 1000) {
+					var bullet = new PlayerBullet()
+						// .id(this.id() + '-bullet'))
+						.width(48)
+						.height(48)
+						.translateTo(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], 0)
+						.rotateTo(this._parent._rotate.x + this._rotate.x, this._parent._rotate.y + this._rotate.y, this._parent._rotate.z + this._rotate.z)
+						.lifeSpan(1000)
+						.mount(ige.client.scene1);
+
+					bullet.owner = this._parent;
+
+					this.lastFireTime = Date.now();
+				}
 			}
 		}
 
 		// Call the IgeEntity (super-class) tick() method
 		this._super(ctx);
+	},
+
+	findTargetEntityByType: function(entityType, owner) {
+		//var entities = ig.game.getEntitiesByType(entityType);
+		var entities = ige.$$(entityType);
+		var entityCount = entities.length;
+
+		var nearestDistance = Infinity;
+		var nearestEntity = null;
+
+		// Loop through entities
+		for (var i=0; i < entityCount; i++) {
+			// Why is the entity inside another array?
+			var entity = entities[i];
+
+			// Skip if this entity
+			if (owner.id() === entity.id()) {
+				continue;
+			}
+
+			// Skip if owned by the current entity
+			if (owner._parent.id() === entity.id()) {
+				continue;
+			}
+
+			// // Skip if owned by the same entity
+			// if (entity._parent && owner._parent.id() === entity._parent.id()) {
+			// 	continue;
+			// }
+
+			// Skip if on the same team
+			if (owner.team === entity.team) {
+				continue;
+			}
+
+			//var distance = owner.distanceTo(entity);
+			var distance = Math.distance(owner._worldMatrix.matrix[2], owner._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
+
+			if (distance < nearestDistance) {
+				nearestDistance = distance;
+				nearestEntity = entity;
+			}
+		}
+
+		return nearestEntity;
 	}
 });
 

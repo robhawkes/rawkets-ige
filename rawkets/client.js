@@ -8,6 +8,10 @@ var Client = IgeClass.extend({
 		bullet: 1
 	},
 
+	layerDepthCount: {
+		ships: 0
+	},
+
 	init: function () {
 		//ige.timeScale(0.1);
 		ige.showStats(1);
@@ -19,7 +23,12 @@ var Client = IgeClass.extend({
 		// Load the textures we want to use
 		self.gameTextures = {
 			background: new IgeTexture('./assets/background.png'),
-			ship: new IgeSpriteSheet('./assets/player.png', [
+			localShip: new IgeSpriteSheet('./assets/player.png', [
+				[0, 364, 222, 364, 'thrust1'],
+				[0, 0, 222, 364, 'thrust2'],
+				[222, 364, 222, 364, 'idle']
+			]),
+			enemyShip: new IgeSpriteSheet('./assets/enemy.png', [
 				[0, 364, 222, 364, 'thrust1'],
 				[0, 0, 222, 364, 'thrust2'],
 				[222, 364, 222, 364, 'idle']
@@ -58,6 +67,22 @@ var Client = IgeClass.extend({
 							// is created because of the incoming stream data
 							.stream.on('entityCreated', function (entity) {
 								self.log('Stream entity created with ID: ' + entity.id());
+
+								// Apply relevent groups
+								var group = "";
+								
+								switch (entity.classId()) {
+									case "Player":
+										group = "EnemyPlayers";
+										break;
+								}
+
+								if (group !== "") {
+									entity.group(group);
+								}
+
+								// Apply texture now group is set
+								entity.applyTexture();
 							});
 
 						self.mainScene = new IgeScene2d()

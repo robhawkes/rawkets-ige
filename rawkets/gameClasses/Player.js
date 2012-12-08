@@ -1,8 +1,6 @@
 var Player = IgeEntity.extend({
 	classId: 'Player',
 
-	// Is local player
-	local: false,
 	target: null,
 
 	moveStates: {
@@ -14,9 +12,11 @@ var Player = IgeEntity.extend({
 
 	turretAnchors: [
 		{x: 0, y: -76},
-		{x: 0, y: -12},
-		{x: 0, y: 64}
+		//{x: 0, y: -12},
+		//{x: 0, y: 64}
 	],
+
+	team: 0,
 
 	init: function (id) {
 		this._super();
@@ -35,7 +35,7 @@ var Player = IgeEntity.extend({
 			
 			// Create turret object
 			var turret = new PlayerTurret()
-				.id(this.id() + '-turret' + i)
+				//.id(this.id() + '-turret' + i)
 				.width(10)
 				.height(16)
 				.translateTo(turretAnchor.x, turretAnchor.y, 0)
@@ -49,18 +49,13 @@ var Player = IgeEntity.extend({
 		if (!ige.isServer) {
 			self.layer(ige.client.entityLayers.ship);
 
+			// Apply depth and increase
+			self.depth(ige.client.layerDepthCount.ships++);
+
 			self.addComponent(IgeAnimationComponent);
-			self.texture(ige.client.gameTextures.ship)
-			.cellById('idle')
-			.anchor(0, -70)
-			.width(222)
-			.height(364);
 
-			self.animation.define('thrust', [1, 2], 20, -1);
-
-			// How do I only make this fire on the client when moving?
-			// Could set a "moving" flag, or perhaps stream the animation state? – Ask Rob
-			//self.animation.select('thrust');
+			// Apply initial texture
+			self.applyTexture();
 		}
 
 		// Define the data sections that will be included in the stream
@@ -175,7 +170,7 @@ var Player = IgeEntity.extend({
 
 	initInput: function() {
 		var self = this;
-		if (self.local) {
+		if (self.group() == "LocalPlayers") {
 			// Listen for the mouse up event
 			ige.input.on('mouseUp', function (event, x, y, button) { self._mouseUp(event, x, y, button); });
 		}
@@ -193,6 +188,22 @@ var Player = IgeEntity.extend({
 
 		// Tell the server about the target change
 		ige.network.send('playerTarget', {x: mousePos.x.toFixed(3), y: mousePos.y.toFixed(3)});
+	},
+
+	applyTexture: function() {
+		var texture = ige.client.gameTextures.enemyShip;
+
+		if (this.group() == "LocalPlayers") {
+			texture = ige.client.gameTextures.localShip;
+		}
+
+		this.texture(texture)
+			.cellById('idle')
+			.anchor(0, -70)
+			.width(222)
+			.height(364);
+
+		this.animation.define('thrust', [1, 2], 20, -1);
 	}
 });
 

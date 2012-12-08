@@ -24,7 +24,18 @@ var ClientNetworkEvents = {
 				if (entity.id() === data) {
 					// Store reference to local player
 					self.localPlayer = ige.$(data);
-					self.localPlayer.local = true;
+
+					// Set group for local player
+					self.localPlayer.group("LocalPlayers");
+
+					// Apply texture now group is set
+					self.localPlayer.applyTexture();
+
+					// Manually set group for local player so they're always on top
+					self.localPlayer.depth(9999);
+
+					// Set local team
+					self.localPlayer.team = 1;
 
 					// Start local input for player
 					self.localPlayer.initInput();

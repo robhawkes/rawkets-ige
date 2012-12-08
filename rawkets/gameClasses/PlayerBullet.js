@@ -1,6 +1,8 @@
 var PlayerBullet = IgeEntity.extend({
 	classId: 'PlayerBullet',
 
+	owner: null,
+
 	init: function (id) {
 		this._super();
 
@@ -15,12 +17,12 @@ var PlayerBullet = IgeEntity.extend({
 		}
 
 		if (!ige.isServer) {
-			self.layer(ige.client.entityLayers.bullet)
+			self.layer(ige.client.entityLayers.bullet);
 
 			self.texture(ige.client.gameTextures.bullet)
-			.anchor(0, 0)
-			.width(48)
-			.height(48);
+				.anchor(0, 0)
+				.width(48)
+				.height(48);
 		}
 
 		// Define the data sections that will be included in the stream
@@ -72,6 +74,47 @@ var PlayerBullet = IgeEntity.extend({
 			//this.rotateToPoint(ige._currentViewport.mousePos());
 			//this.rotateBy(0, 0, 0.0005 * ige._tickDelta);
 			this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 1);
+
+			// Check if within AABB of enemy for first-pass collision
+			var targetGroup = (this.owner.group() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
+			var entities = ige.$$(targetGroup);
+			var entityCount = entities.length;
+
+			// Loop through entities
+			for (var i=0; i < entityCount; i++) {
+				// Why is the entity inside another array?
+				var entity = entities[i];
+
+				// Skip if this entity
+				if (this.owner.id() === entity.id()) {
+					continue;
+				}
+
+				// Skip if owned by the current entity
+				if (this.owner._parent.id() === entity.id()) {
+					continue;
+				}
+
+				// // Skip if owned by the same entity
+				// if (entity._parent && owner._parent.id() === entity._parent.id()) {
+				// 	continue;
+				// }
+
+				// Skip if on the same team
+				if (this.owner.team === entity.team) {
+					continue;
+				}
+
+				//console.log(this.owner.group(), entity.group(), targetGroup);
+
+				var aabb = entity.aabb();
+				if (aabb.xyInside(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5])) {
+					this.destroy();
+					console.log("Hit");
+				}
+			}
+
+			// Check fine-level collision using rotated rectangles
 		}
 
 		// Call the IgeEntity (super-class) tick() method
