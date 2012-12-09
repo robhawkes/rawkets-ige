@@ -34,7 +34,8 @@ var Client = IgeClass.extend({
 				[222, 364, 222, 364, 'idle']
 			]),
 			turret: new IgeTexture('./assets/turret.png'),
-			bullet: new IgeTexture('./assets/plasma.png')
+			bullet: new IgeTexture('./assets/plasma.png'),
+			explosionParticle: new IgeCellSheet('./assets/explosion-trans.png', 3, 1)
 		};
 
 		// Enable networking
@@ -47,6 +48,21 @@ var Client = IgeClass.extend({
 		ige.createFrontBuffer(true);
 
 		ige.on('texturesLoaded', function () {
+			// Apply texture filters
+			//self.gameTextures.explosionParticle.applyFilter(IgeFilters.glowMask, {glowMask: self.gameTextures.explosionParticleMask, blurPasses: false, glowPasses: 3});
+			//.applyFilter(IgeFilters.glowMask, {glowMask: gameTexture[12], blurPasses:50, glowPasses: 2});
+			// self.gameTextures.explosionParticle.applyFilter(function(canvas, ctx, originalImage) {
+			// 	// Clear the canvas
+			// 	ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+			// 	ctx.globalCompositeOperation = 'lighter';
+			 
+			// 	// Draw the original image
+			// 	ctx.drawImage(originalImage, 0, 0);
+
+			// 	ctx.globalCompositeOperation = 'source-over';
+			// });
+
 			// Ask the engine to start
 			ige.start(function (success) {
 				// Check if the engine started successfully
@@ -112,7 +128,7 @@ var Client = IgeClass.extend({
 							.id('vp1')
 							.autoSize(true)
 							.scene(self.mainScene)
-							.drawBounds(true)
+							//.drawBounds(true)
 							.drawMouse(true)
 							.mount(ige);
 

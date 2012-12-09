@@ -114,6 +114,46 @@ var PlayerBullet = IgeEntity.extend({
 				var aabb = entity.aabb();
 				//if (aabb.xyInside(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5])) {
 				if (aabb.xyInside(this._translate.x, this._translate.y)) {
+					// Spawn explosion particles
+					// Example emitter
+					var particleRotation = Math.ceil(Math.random()*360);
+					
+					var emitter = new IgeParticleEmitter()
+						//.id('emitter1')
+						.particle(ExplosionParticle)
+						.lifeBase(500)
+						.quantityTimespan(1)
+						.quantityBase(4)
+						.quantityMax(4)
+						//.translateVarianceX(-50, 50)
+						//.scaleBaseX(0.2)
+						//.scaleBaseY(0.2)
+						//.scaleLockAspect(true)
+						.rotateBase(particleRotation)
+						//.rotateVariance(0, 360)
+						//.opacityBase(0.5)
+						//.velocityVector(new IgePoint(0, 0, 0), new IgePoint(0, 0, 0), new IgePoint((Math.random() * 2 - 1) * 0.02, (Math.random() * 2 - 1) * 0.02, 0))
+						.velocityVector(new IgePoint(0, 0, 0), new IgePoint(-0.02, -0.02, 0), new IgePoint(0.02, 0.02, 0))
+						//.linearForceVector(new IgePoint(0, 0.012, 0), new IgePoint(0, 0, 0), new IgePoint(0, 0, 0))
+						//.deathScaleBaseX(0)
+						//.deathScaleVarianceX(0, 1)
+						//.deathScaleBaseY(0.7)
+						.deathRotateBase(particleRotation)
+						.deathRotateVariance(-45, 45)
+						.deathOpacityBase(0.0)
+						.layer(10000)
+						.depth(1)
+						.width(32)
+						.height(32)
+						.translateTo(this._translate.x, this._translate.y, 0)
+						.particleMountTarget(this._parent)
+						.mount(this._parent)
+						.start();
+
+					setTimeout(function() {
+						emitter.destroy();
+					}, 1000);
+
 					this.destroy();
 					break;
 				}
