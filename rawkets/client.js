@@ -49,21 +49,6 @@ var Client = IgeClass.extend({
 		ige.createFrontBuffer(true);
 
 		ige.on('texturesLoaded', function () {
-			// Apply texture filters
-			//self.gameTextures.explosionParticle.applyFilter(IgeFilters.glowMask, {glowMask: self.gameTextures.explosionParticleMask, blurPasses: false, glowPasses: 3});
-			//.applyFilter(IgeFilters.glowMask, {glowMask: gameTexture[12], blurPasses:50, glowPasses: 2});
-			// self.gameTextures.explosionParticle.applyFilter(function(canvas, ctx, originalImage) {
-			// 	// Clear the canvas
-			// 	ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-			// 	ctx.globalCompositeOperation = 'lighter';
-			 
-			// 	// Draw the original image
-			// 	ctx.drawImage(originalImage, 0, 0);
-
-			// 	ctx.globalCompositeOperation = 'source-over';
-			// });
-
 			// Ask the engine to start
 			ige.start(function (success) {
 				// Check if the engine started successfully
@@ -132,11 +117,6 @@ var Client = IgeClass.extend({
 							//.drawBounds(true)
 							.drawMouse(true)
 							.mount(ige);
-
-						// Define our player controls
-						// ige.input.mapAction('left', ige.input.key.left);
-						// ige.input.mapAction('right', ige.input.key.right);
-						// ige.input.mapAction('thrust', ige.input.key.up);
 
 						// Ask the server to create an entity for us
 						ige.network.send('playerEntity');

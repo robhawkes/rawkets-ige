@@ -78,8 +78,6 @@ var PlayerBullet = IgeEntity.extend({
 		/* CEXCLUDE */
 
 		if (!ige.isServer) {
-			//this.rotateToPoint(ige._currentViewport.mousePos());
-			//this.rotateBy(0, 0, 0.0005 * ige._tickDelta);
 			this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 1);
 
 			// Check if within AABB of enemy for first-pass collision
@@ -112,8 +110,6 @@ var PlayerBullet = IgeEntity.extend({
 				// 	continue;
 				// }
 
-				//console.log(this.owner.group(), entity.group(), targetGroup);
-
 				// Ideally want to use AABB boxes for first-pass collision checks but
 				// it seems they aren't in global worldspace, causing funkiness
 				// Talk to Rob about getting around this
@@ -142,19 +138,8 @@ var PlayerBullet = IgeEntity.extend({
 						.quantityTimespan(1)
 						.quantityBase(4)
 						.quantityMax(4)
-						//.translateVarianceX(-50, 50)
-						//.scaleBaseX(0.2)
-						//.scaleBaseY(0.2)
-						//.scaleLockAspect(true)
 						.rotateBase(particleRotation)
-						//.rotateVariance(0, 360)
-						//.opacityBase(0.5)
-						//.velocityVector(new IgePoint(0, 0, 0), new IgePoint(0, 0, 0), new IgePoint((Math.random() * 2 - 1) * 0.02, (Math.random() * 2 - 1) * 0.02, 0))
 						.velocityVector(new IgePoint(0, 0, 0), new IgePoint(-0.02, -0.02, 0), new IgePoint(0.02, 0.02, 0))
-						//.linearForceVector(new IgePoint(0, 0.012, 0), new IgePoint(0, 0, 0), new IgePoint(0, 0, 0))
-						//.deathScaleBaseX(0)
-						//.deathScaleVarianceX(0, 1)
-						//.deathScaleBaseY(0.7)
 						.deathRotateBase(particleRotation)
 						.deathRotateVariance(-45, 45)
 						.deathOpacityBase(0.0)
@@ -174,18 +159,7 @@ var PlayerBullet = IgeEntity.extend({
 					this.destroy();
 					break;
 				}
-
-				// In the meantime, use a distance-based check for first-pass collision checks
-				// //var distance = Math.distance(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
-				// var distance = Math.distance(this._translate.x, this._translate.y, entity._translate.x, entity._translate.y);
-				// //console.log(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
-				// if (distance < 100) {
-				// 	this.destroy();
-				// 	break;
-				// }
 			}
-
-			// Check fine-level collision using rotated rectangles
 		}
 
 		// Call the IgeEntity (super-class) tick() method

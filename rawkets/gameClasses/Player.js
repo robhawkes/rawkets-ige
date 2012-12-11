@@ -33,7 +33,6 @@ var Player = IgeEntity.extend({
 			
 			// Create turret object
 			var turret = new PlayerTurret()
-				//.id(this.id() + '-turret' + i)
 				.width(10)
 				.height(16)
 				.translateTo(turretAnchor.x, turretAnchor.y, 0)
@@ -73,7 +72,7 @@ var Player = IgeEntity.extend({
 		}
 
 		// Define the data sections that will be included in the stream
-		this.streamSections(['transform', 'score', 'moveState']);
+		this.streamSections(['transform', 'moveState']);
 	},
 
 	/**
@@ -88,17 +87,6 @@ var Player = IgeEntity.extend({
 	 */
 	streamSectionData: function (sectionId, data) {
 		// Check if the section is one that we are handling
-		// if (sectionId === 'score') {
-		// 	// Check if the server sent us data, if not we are supposed
-		// 	// to return the data instead of set it
-		// 	if (data) {
-		// 		// We have been given new data!
-		// 		this._score = data;
-		// 	} else {
-		// 		// Return current data
-		// 		return this._score;
-		// 	}
-		// } else 
 		if (sectionId === 'moveState') {
 			// Check if the server sent us data, if not we are supposed
 			// to return the data instead of set it
@@ -197,9 +185,7 @@ var Player = IgeEntity.extend({
 	*/
 	_mouseUp: function (event, x, y, button) {
 		var mousePos = this.mousePosWorld();
-		//console.log(x + ", " + y);
-		//console.log(ige._currentViewport._mousePos.x + ", " + ige._currentViewport._mousePos.y);
-
+		
 		// Tell the server about the target change
 		ige.network.send('playerTarget', {x: mousePos.x.toFixed(3), y: mousePos.y.toFixed(3)});
 	},
