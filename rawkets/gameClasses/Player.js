@@ -47,6 +47,22 @@ var Player = IgeEntity.extend({
 		if (!ige.isServer) {
 			self.layer(ige.client.entityLayers.ship);
 
+			// self.addComponent(IgeObbComponent, {
+			// 	width: 90,
+			// 	height: 222,
+			// 	x: this._worldMatrix.matrix[2],
+			// 	y: this._worldMatrix.matrix[5],
+			// 	angle: this._rotate.z - Math.radians(-45)
+			// });
+
+			self.addComponent(IgeSatComponent, {
+				width: 90,
+				height: 222,
+				x: this._worldMatrix.matrix[2],
+				y: this._worldMatrix.matrix[5],
+				angle: this._rotate.z - Math.radians(-45)
+			});
+
 			// Apply depth and increase
 			self.depth(ige.client.layerDepthCount.ships++);
 

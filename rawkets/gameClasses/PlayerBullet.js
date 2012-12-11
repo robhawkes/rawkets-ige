@@ -17,6 +17,13 @@ var PlayerBullet = IgeEntity.extend({
 		}
 
 		if (!ige.isServer) {
+			// self.addComponent(IgeObbComponent, {
+			// 	width: 4,
+			// 	height: 4,
+			// 	x: this._worldMatrix.matrix[2],
+			// 	y: this._worldMatrix.matrix[5]
+			// });
+
 			self.layer(ige.client.entityLayers.bullet);
 
 			self.texture(ige.client.gameTextures.bullet)
@@ -114,6 +121,16 @@ var PlayerBullet = IgeEntity.extend({
 				var aabb = entity.aabb();
 				//if (aabb.xyInside(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5])) {
 				if (aabb.xyInside(this._translate.x, this._translate.y)) {
+					// Perform fine-level check to see if bullet is overlapping considering OBB
+					// if (!this.obb.checkCollisionBoolean(this.obb._poly, entity.obb._poly)) {
+					// 	continue;
+					// } else {
+					// 	this.destroy();
+					// 	break;
+					// }
+
+					// console.log("Hit");
+
 					// Spawn explosion particles
 					// Example emitter
 					var particleRotation = Math.ceil(Math.random()*360);

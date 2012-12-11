@@ -20,9 +20,6 @@ var ExplosionParticle = IgeEntity.extend({
 			.height(32)
 			.drawBounds(false)
 			.drawBoundsData(false);
-
-		//this.animation.define('idle', [1, 2, 3], 10, 0);
-		//this.animation.select('idle');
 	},
 
 	/**
@@ -31,10 +28,9 @@ var ExplosionParticle = IgeEntity.extend({
 	 * @param ctx The canvas context to render to.
 	 */
 	tick: function (ctx) {
-		//ctx.globalCompositeOperation = 'lighter';
+		ctx.globalCompositeOperation = 'lighter';
 		// Call the IgeEntity (super-class) tick() method
 		this._super(ctx);
-		//ctx.globalCompositeOperation = 'source-over';
 	},
 
 	destroy: function () {

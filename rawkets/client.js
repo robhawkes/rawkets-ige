@@ -35,7 +35,8 @@ var Client = IgeClass.extend({
 			]),
 			turret: new IgeTexture('./assets/turret.png'),
 			bullet: new IgeTexture('./assets/plasma.png'),
-			explosionParticle: new IgeCellSheet('./assets/explosion-trans.png', 3, 1)
+			//explosionParticle: new IgeCellSheet('./assets/explosion-trans.png', 3, 1)
+			explosionParticle: new IgeCellSheet('./assets/explosion.png', 3, 1)
 		};
 
 		// Enable networking
