@@ -15,6 +15,8 @@ var Fighter = IgeEntity.extend({
 
 		if (ige.isServer) {
 			self.addComponent(IgeVelocityComponent);
+			self.velocity.x(Math.random()*0.2 - 0.1);
+			self.velocity.y(Math.random()*0.2 - 0.1);
 		}
 
 		if (!ige.isServer) {
@@ -89,8 +91,8 @@ var Fighter = IgeEntity.extend({
 				}
 				rule1Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
 				
-				rule1Vector.x = (rule1Vector.x - this._translate.x) / 10000;
-				rule1Vector.y = (rule1Vector.y - this._translate.y) / 10000;
+				rule1Vector.x = (rule1Vector.x - this._translate.x) / 20000;
+				rule1Vector.y = (rule1Vector.y - this._translate.y) / 20000;
 
 				// Rule 2: Boids try to keep a small distance away from other objects (including other boids)
 				var rule2Vector = new IgePoint(0, 0, 0);
@@ -99,7 +101,7 @@ var Fighter = IgeEntity.extend({
 						if (Math.distance(this._translate.x, this._translate.y, friendlyFighters[r2]._translate.x, friendlyFighters[r2]._translate.y) < 15) {
 							var subtractBoidVectors = friendlyFighters[r2]._translate.minusPoint(this._translate);
 							rule2Vector.thisMinusPoint(subtractBoidVectors);
-							rule2Vector.thisMultiply(0.0005, 0.0005, 0.0005);
+							rule2Vector.thisMultiply(0.0002, 0.0002, 0.0002);
 						}
 					}
 				}
