@@ -2,6 +2,7 @@ var Fighter = IgeEntity.extend({
 	classId: 'Fighter',
 
 	team: 0,
+	velocityLimit: 0.1,
 
 	init: function (ownerId) {
 		this._super();
@@ -74,47 +75,102 @@ var Fighter = IgeEntity.extend({
 	tick: function (ctx) {
 		/* CEXCLUDE */
 		if (ige.isServer) {
-			// 1. Find nearest target entity
-			var targetEntity = this.findTargetEntityByType('Fighter', this._parent);
+			// Find all friendly fighters
+			var friendlyFighters = this.findFriendlyFighters();
 
-			//console.log(targetEntity);
-
-			//this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.1);
-
-			// If player is further than 10 pixels away from the movement target
-			if (targetEntity) {
-				var target = targetEntity._translate;
-				//if (Math.abs(this._translate.x - target.x) > 10 || Math.abs(this._translate.y - target.y) > 10) {
-					// 1. Find relative distance and angle to target
-					var diffX = this._translate.x - target.x;
-					var diffY = this._translate.y - target.y;
-					var relativeDiffX = diffX * Math.cos(this._rotate.z - Math.radians(270)) + diffY * Math.sin(this._rotate.z - Math.radians(270));
-					var relativeDiffY = diffY * Math.cos(this._rotate.z - Math.radians(270)) - diffX * Math.sin(this._rotate.z - Math.radians(270));
-
-					var angle = Math.atan2(diffY, diffX) + Math.radians(270) - this._parent._rotate.z;
-					var relativeAngle = Math.atan2(relativeDiffY, relativeDiffX);
-
-					// 2. Rotate slightly in direction of new target
-					var rotation = 0;
-					if (relativeAngle > 0.005 && relativeAngle < Math.PI) {
-						rotation = 0.005 * ige._tickDelta;
-					} else if (relativeAngle < -0.005 && relativeAngle > -Math.PI) {
-						rotation = -0.005 * ige._tickDelta;
+			var friendlyFighterCount = friendlyFighters.length;
+			if (friendlyFighterCount > 0) {
+				// Rule 1: Boids try to fly towards the centre of mass of neighbouring boids
+				var rule1Vector = new IgePoint(0, 0, 0);
+				for (var r1 = 0; r1 < friendlyFighterCount; r1++) {
+					if (friendlyFighters[r1].id() !== this.id()) {
+						rule1Vector.thisAddPoint(friendlyFighters[r1]._translate);
 					}
-					this.rotateBy(0, 0, rotation);
+				}
+				rule1Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
+				
+				rule1Vector.x = (rule1Vector.x - this._translate.x) / 10000;
+				rule1Vector.y = (rule1Vector.y - this._translate.y) / 10000;
 
-					if (relativeAngle > -0.005 && relativeAngle < 0.005) {
-						this.rotateBy(0, 0, relativeAngle);
+				// Rule 2: Boids try to keep a small distance away from other objects (including other boids)
+				var rule2Vector = new IgePoint(0, 0, 0);
+				for (var r2 = 0; r2 < friendlyFighterCount; r2++) {
+					if (friendlyFighters[r2].id() != this.id()) {
+						if (Math.distance(this._translate.x, this._translate.y, friendlyFighters[r2]._translate.x, friendlyFighters[r2]._translate.y) < 15) {
+							var subtractBoidVectors = friendlyFighters[r2]._translate.minusPoint(this._translate);
+							rule2Vector.thisMinusPoint(subtractBoidVectors);
+							rule2Vector.thisMultiply(0.0005, 0.0005, 0.0005);
+						}
 					}
+				}
 
-					this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.1);
-				// } else {
-				// 	// Do something if there is no target
-				// 	// Just fly aimlessly?
-				// 	this.velocity.x(0);
-				// 	this.velocity.y(0);
-				// }
+				// Rule 3: Boids try to match velocity with near boids
+				var rule3Vector = new IgePoint(0, 0, 0);
+				//if (!scatter) {
+					for (var r3 = 0; r3 < friendlyFighterCount; r3++) {
+						if (friendlyFighters[r3].id() != this.id()) {
+							rule3Vector.thisAddPoint(friendlyFighters[r3].velocity._velocity);
+						}
+					}
+					rule3Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
+				
+					rule3Vector.x = (rule3Vector.x - this.velocity._velocity.x) / 50;
+					rule3Vector.y = (rule3Vector.y - this.velocity._velocity.y) / 50;
+				//}
+
+				// Add velocities
+				var rulesVelocity = new IgePoint(0, 0, 0);
+				rulesVelocity.thisAddPoint(rule1Vector);
+				rulesVelocity.thisAddPoint(rule2Vector);
+				rulesVelocity.thisAddPoint(rule3Vector);
+				//rulesVelocity.add(rule4Vector);
+				
+				this.velocity._velocity.thisAddPoint(rulesVelocity);
 			}
+
+			this.limitVelocity();
+
+			// // 1. Find nearest target entity
+			// var targetEntity = this.findTargetEntityByType('Fighter', this._parent);
+
+			// //console.log(targetEntity);
+
+			// //this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.1);
+
+			// // If player is further than 10 pixels away from the movement target
+			// if (targetEntity) {
+			// 	var target = targetEntity._translate;
+			// 	//if (Math.abs(this._translate.x - target.x) > 10 || Math.abs(this._translate.y - target.y) > 10) {
+			// 		// 1. Find relative distance and angle to target
+			// 		var diffX = this._translate.x - target.x;
+			// 		var diffY = this._translate.y - target.y;
+			// 		var relativeDiffX = diffX * Math.cos(this._rotate.z - Math.radians(270)) + diffY * Math.sin(this._rotate.z - Math.radians(270));
+			// 		var relativeDiffY = diffY * Math.cos(this._rotate.z - Math.radians(270)) - diffX * Math.sin(this._rotate.z - Math.radians(270));
+
+			// 		var angle = Math.atan2(diffY, diffX) + Math.radians(270) - this._parent._rotate.z;
+			// 		var relativeAngle = Math.atan2(relativeDiffY, relativeDiffX);
+
+			// 		// 2. Rotate slightly in direction of new target
+			// 		var rotation = 0;
+			// 		if (relativeAngle > 0.005 && relativeAngle < Math.PI) {
+			// 			rotation = 0.005 * ige._tickDelta;
+			// 		} else if (relativeAngle < -0.005 && relativeAngle > -Math.PI) {
+			// 			rotation = -0.005 * ige._tickDelta;
+			// 		}
+			// 		this.rotateBy(0, 0, rotation);
+
+			// 		if (relativeAngle > -0.005 && relativeAngle < 0.005) {
+			// 			this.rotateBy(0, 0, relativeAngle);
+			// 		}
+
+			// 		this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 0.1);
+			// 	// } else {
+			// 	// 	// Do something if there is no target
+			// 	// 	// Just fly aimlessly?
+			// 	// 	this.velocity.x(0);
+			// 	// 	this.velocity.y(0);
+			// 	// }
+			// }
 		}
 		/* CEXCLUDE */
 
@@ -142,6 +198,51 @@ var Fighter = IgeEntity.extend({
 		this.texture(texture)
 			.width(6)
 			.height(8);
+	},
+
+	findFriendlyFighters: function() {
+		var entities = ige.$$("Fighter");
+		var entityCount = entities.length;
+
+		var returnedEntities = [];
+
+		// Loop through entities
+		for (var i=0; i < entityCount; i++) {
+			// Why is the entity inside another array?
+			var entity = entities[i];
+
+			// Skip if this entity
+			if (this.id() === entity.id()) {
+				continue;
+			}
+
+			// // Skip if owned by the current entity
+			// if (this.ownerId === entity.id()) {
+			// 	continue;
+			// }
+
+			// Skip if not owned by the same entity
+			if (entity.ownerId && this.ownerId !== entity.ownerId) {
+				continue;
+			}
+
+			// Skip if on the same team
+			// if (this.team === entity.team) {
+			// 	continue;
+			// }
+
+			//var distance = owner.distanceTo(entity);
+			// var distance = Math.distance(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
+
+			// if (distance < nearestDistance) {
+			// 	nearestDistance = distance;
+			// 	nearestEntity = entity;
+			// }
+
+			returnedEntities.push(entity);
+		}
+
+		return returnedEntities;
 	},
 
 	findTargetEntityByType: function(entityType) {
@@ -187,6 +288,16 @@ var Fighter = IgeEntity.extend({
 		}
 
 		return nearestEntity;
+	},
+
+	limitVelocity: function() {
+		// Magnitude (hypotenuse) of velocity
+		var velocity = Math.sqrt(this.velocity._velocity.x * this.velocity._velocity.x + this.velocity._velocity.y * this.velocity._velocity.y);
+
+		if (velocity > this.velocityLimit) {
+			this.velocity._velocity.x = (this.velocity._velocity.x/velocity) * this.velocityLimit;
+			this.velocity._velocity.y = (this.velocity._velocity.y/velocity) * this.velocityLimit;
+		}
 	}
 });
 
