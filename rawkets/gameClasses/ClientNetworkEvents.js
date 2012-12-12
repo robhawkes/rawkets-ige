@@ -14,7 +14,7 @@ var ClientNetworkEvents = {
 
 			// Set the time stream UI entity to monitor our player entity
 			// time stream data
-			ige.client.tsVis.monitor(ige.$(data));
+			ige.client.tsVis.monitor(self.localPlayer);
 		} else {
 			// The client has not yet received the entity via the network
 			// stream so lets ask the stream to tell us when it creates a

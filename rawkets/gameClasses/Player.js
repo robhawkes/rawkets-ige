@@ -18,10 +18,10 @@ var Player = IgeEntity.extend({
 
 	team: 0,
 
-	init: function (id) {
-		this._super();
+	lastFighterTime: null,
 
-		this.id(id);
+	init: function () {
+		this._super();
 
 		var self = this;
 
@@ -41,6 +41,7 @@ var Player = IgeEntity.extend({
 
 		if (ige.isServer) {
 			this.addComponent(IgeVelocityComponent);
+			this.lastFireTime = 0;
 		}
 
 		if (!ige.isServer) {
@@ -54,13 +55,13 @@ var Player = IgeEntity.extend({
 			// 	angle: this._rotate.z - Math.radians(-45)
 			// });
 
-			self.addComponent(IgeSatComponent, {
-				width: 90,
-				height: 222,
-				x: this._worldMatrix.matrix[2],
-				y: this._worldMatrix.matrix[5],
-				angle: this._rotate.z - Math.radians(-45)
-			});
+			// self.addComponent(IgeSatComponent, {
+			// 	width: 90,
+			// 	height: 222,
+			// 	x: this._worldMatrix.matrix[2],
+			// 	y: this._worldMatrix.matrix[5],
+			// 	angle: this._rotate.z - Math.radians(-45)
+			// });
 
 			// Apply depth and increase
 			self.depth(ige.client.layerDepthCount.ships++);
@@ -153,6 +154,20 @@ var Player = IgeEntity.extend({
 					this.velocity.y(0);
 					this.moveState = this.moveStates.idle;
 				}
+			}
+
+			// Launch fighters
+			if (Date.now() - this.lastFighterTime > 5000) {
+				var fighter = new Fighter(this.id())
+					.width(6)
+					.height(8)
+					.translateTo(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], 0)
+					.rotateTo(this._parent._rotate.x + this._rotate.x, this._parent._rotate.y + this._rotate.y, this._parent._rotate.z + Math.random()*Math.radians(360))
+					.lifeSpan(10000)
+					.streamMode(1)
+					.mount(ige.server.scene1);
+
+				this.lastFighterTime = Date.now();
 			}
 		}
 		/* CEXCLUDE */

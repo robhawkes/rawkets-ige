@@ -5,11 +5,13 @@ var Client = IgeClass.extend({
 
 	entityLayers: {
 		ship: 0,
-		bullet: 1
+		bullet: 1,
+		fighter: 2
 	},
 
 	layerDepthCount: {
-		ships: 0
+		ships: 0,
+		fighters: 1
 	},
 
 	init: function () {
@@ -36,7 +38,9 @@ var Client = IgeClass.extend({
 			turret: new IgeTexture('./assets/turret.png'),
 			bullet: new IgeTexture('./assets/plasma.png'),
 			//explosionParticle: new IgeCellSheet('./assets/explosion-trans.png', 3, 1)
-			explosionParticle: new IgeCellSheet('./assets/explosion.png', 3, 1)
+			explosionParticle: new IgeCellSheet('./assets/explosion.png', 3, 1),
+			localFighter: new IgeTexture('./assets/fighter.png'),
+			enemyFighter: new IgeTexture('./assets/fighter-enemy.png')
 		};
 
 		// Enable networking

@@ -3,10 +3,8 @@ var PlayerBullet = IgeEntity.extend({
 
 	owner: null,
 
-	init: function (id) {
+	init: function () {
 		this._super();
-
-		this.id(id);
 
 		var self = this;
 

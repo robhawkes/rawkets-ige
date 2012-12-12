@@ -10,10 +10,8 @@ var PlayerTurret = IgeEntity.extend({
 
 	lastFireTime: null,
 
-	init: function (id) {
+	init: function () {
 		this._super();
-
-		this.id(id);
 
 		var self = this;
 
@@ -35,7 +33,7 @@ var PlayerTurret = IgeEntity.extend({
 		}
 
 		// Define the data sections that will be included in the stream
-		this.streamSections(['transform', 'fireState']);
+		//this.streamSections(['transform', 'fireState']);
 	},
 
 	/**
@@ -48,24 +46,24 @@ var PlayerTurret = IgeEntity.extend({
 	 * from the server to the client for this entity.
 	 * @return {*}
 	 */
-	streamSectionData: function (sectionId, data) {
-		if (sectionId === 'fireState') {
-			// Check if the server sent us data, if not we are supposed
-			// to return the data instead of set it
-			if (data) {
-				// We have been given new data!
-				this.fireState = data;
-			} else {
-				// Return current data
-				return this.fireState;
-			}
-		} else {
-			// The section was not one that we handle here, so pass this
-			// to the super-class streamSectionData() method - it handles
-			// the "transform" section by itself
-			return this._super(sectionId, data);
-		}
-	},
+	// streamSectionData: function (sectionId, data) {
+	// 	if (sectionId === 'fireState') {
+	// 		// Check if the server sent us data, if not we are supposed
+	// 		// to return the data instead of set it
+	// 		if (data) {
+	// 			// We have been given new data!
+	// 			this.fireState = data;
+	// 		} else {
+	// 			// Return current data
+	// 			return this.fireState;
+	// 		}
+	// 	} else {
+	// 		// The section was not one that we handle here, so pass this
+	// 		// to the super-class streamSectionData() method - it handles
+	// 		// the "transform" section by itself
+	// 		return this._super(sectionId, data);
+	// 	}
+	// },
 
 	/**
 	 * Called every frame by the engine when this entity is mounted to the
