@@ -145,10 +145,10 @@ var PlayerTurret = IgeEntity.extend({
 			// 	continue;
 			// }
 
-			// Skip if on the same team
-			if (owner.team === entity.team) {
-				continue;
-			}
+			// // Skip if on the same team
+			// if (owner.team === entity.team) {
+			// 	continue;
+			// }
 
 			//var distance = owner.distanceTo(entity);
 			var distance = Math.distance(owner._worldMatrix.matrix[2], owner._worldMatrix.matrix[5], entity._worldMatrix.matrix[2], entity._worldMatrix.matrix[5]);
