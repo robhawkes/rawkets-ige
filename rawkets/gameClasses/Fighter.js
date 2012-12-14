@@ -2,7 +2,14 @@ var Fighter = IgeEntity.extend({
 	classId: 'Fighter',
 
 	team: 0,
-	velocityLimit: 0.1,
+
+	// Should these go somewhere else?
+	maxAcceleration: 0.0005,
+	maxVelocity: 0.1,
+	// maxAngularAcceleration: Math.radians(0.01),
+	// maxRotation: Math.radians(1),
+	// rotation: 0,
+	friction: 0.96,
 
 	init: function (ownerId) {
 		this._super();
@@ -15,8 +22,10 @@ var Fighter = IgeEntity.extend({
 
 		if (ige.isServer) {
 			self.addComponent(IgeVelocityComponent);
-			self.velocity.x(Math.random()*0.2 - 0.1);
-			self.velocity.y(Math.random()*0.2 - 0.1);
+			//self.velocity.x(Math.random()*0.1 - 0.05);
+			//self.velocity.y(Math.random()*0.1 - 0.05);
+
+			self.addComponent(IgeSteerComponent);
 		}
 
 		if (!ige.isServer) {
@@ -77,60 +86,95 @@ var Fighter = IgeEntity.extend({
 	tick: function (ctx) {
 		/* CEXCLUDE */
 		if (ige.isServer) {
+			// Test steer component
+			// Seek
+			//var steering = this.steer.seek({position: new IgeVector(100, -100)});
+			// Arrive
+			//var steering = this.steer.arrive({position: new IgeVector(100, -100)});
+			// Align
+			//var steering = this.steer.align({orientation: Math.radians(315)});
+			//console.log(steering.rotation);
+			// Velocity match
+			//var steering = this.steer.velocityMatch({velocity: new IgeVector(0.1, 0)});
+			// Pursue
+			//var steering = this.steer.pursue({velocity: new IgeVector(0.1, 0.1), position: new IgeVector(200, -200)});
+			//var steering = this.steer.pursue({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
+			// Evade
+			var steering = this.steer.evade({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
+			
+			this.velocity._velocity.x += steering.velocity.x * ige._tickDelta;
+			this.velocity._velocity.y += steering.velocity.y * ige._tickDelta;
+
+			// this.rotation += steering.rotation * ige._tickDelta;
+			// this._rotate.z += this.rotation;
+
 			// Find all friendly fighters
-			var friendlyFighters = this.findFriendlyFighters();
+			// var friendlyFighters = this.findFriendlyFighters();
 
-			var friendlyFighterCount = friendlyFighters.length;
-			if (friendlyFighterCount > 0) {
-				// Rule 1: Boids try to fly towards the centre of mass of neighbouring boids
-				var rule1Vector = new IgePoint(0, 0, 0);
-				for (var r1 = 0; r1 < friendlyFighterCount; r1++) {
-					if (friendlyFighters[r1].id() !== this.id()) {
-						rule1Vector.thisAddPoint(friendlyFighters[r1]._translate);
-					}
-				}
-				rule1Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
+			// var friendlyFighterCount = friendlyFighters.length;
+			// if (friendlyFighterCount > 0) {
+			// 	// Rule 1: Boids try to fly towards the centre of mass of neighbouring boids
+			// 	var rule1Vector = new IgePoint(0, 0, 0);
+			// 	for (var r1 = 0; r1 < friendlyFighterCount; r1++) {
+			// 		if (friendlyFighters[r1].id() !== this.id()) {
+			// 			rule1Vector.thisAddPoint(friendlyFighters[r1]._translate);
+			// 		}
+			// 	}
+			// 	rule1Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
 				
-				rule1Vector.x = (rule1Vector.x - this._translate.x) / 20000;
-				rule1Vector.y = (rule1Vector.y - this._translate.y) / 20000;
+			// 	rule1Vector.x = (rule1Vector.x - this._translate.x) / 20000;
+			// 	rule1Vector.y = (rule1Vector.y - this._translate.y) / 20000;
 
-				// Rule 2: Boids try to keep a small distance away from other objects (including other boids)
-				var rule2Vector = new IgePoint(0, 0, 0);
-				for (var r2 = 0; r2 < friendlyFighterCount; r2++) {
-					if (friendlyFighters[r2].id() != this.id()) {
-						if (Math.distance(this._translate.x, this._translate.y, friendlyFighters[r2]._translate.x, friendlyFighters[r2]._translate.y) < 15) {
-							var subtractBoidVectors = friendlyFighters[r2]._translate.minusPoint(this._translate);
-							rule2Vector.thisMinusPoint(subtractBoidVectors);
-							rule2Vector.thisMultiply(0.0002, 0.0002, 0.0002);
-						}
-					}
-				}
+			// 	// Rule 2: Boids try to keep a small distance away from other objects (including other boids)
+			// 	var rule2Vector = new IgePoint(0, 0, 0);
+			// 	for (var r2 = 0; r2 < friendlyFighterCount; r2++) {
+			// 		if (friendlyFighters[r2].id() != this.id()) {
+			// 			if (Math.distance(this._translate.x, this._translate.y, friendlyFighters[r2]._translate.x, friendlyFighters[r2]._translate.y) < 15) {
+			// 				var subtractBoidVectors = friendlyFighters[r2]._translate.minusPoint(this._translate);
+			// 				rule2Vector.thisMinusPoint(subtractBoidVectors);
+			// 				rule2Vector.thisMultiply(0.0002, 0.0002, 0.0002);
+			// 			}
+			// 		}
+			// 	}
 
-				// Rule 3: Boids try to match velocity with near boids
-				var rule3Vector = new IgePoint(0, 0, 0);
-				//if (!scatter) {
-					for (var r3 = 0; r3 < friendlyFighterCount; r3++) {
-						if (friendlyFighters[r3].id() != this.id()) {
-							rule3Vector.thisAddPoint(friendlyFighters[r3].velocity._velocity);
-						}
-					}
-					rule3Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
+			// 	// Rule 3: Boids try to match velocity with near boids
+			// 	var rule3Vector = new IgePoint(0, 0, 0);
+			// 	//if (!scatter) {
+			// 		for (var r3 = 0; r3 < friendlyFighterCount; r3++) {
+			// 			if (friendlyFighters[r3].id() != this.id()) {
+			// 				rule3Vector.thisAddPoint(friendlyFighters[r3].velocity._velocity);
+			// 			}
+			// 		}
+			// 		rule3Vector.thisDivide(friendlyFighterCount, friendlyFighterCount, friendlyFighterCount);
 				
-					rule3Vector.x = (rule3Vector.x - this.velocity._velocity.x) / 50;
-					rule3Vector.y = (rule3Vector.y - this.velocity._velocity.y) / 50;
-				//}
+			// 		rule3Vector.x = (rule3Vector.x - this.velocity._velocity.x) / 50;
+			// 		rule3Vector.y = (rule3Vector.y - this.velocity._velocity.y) / 50;
+			// 	//}
 
-				// Add velocities
-				var rulesVelocity = new IgePoint(0, 0, 0);
-				rulesVelocity.thisAddPoint(rule1Vector);
-				rulesVelocity.thisAddPoint(rule2Vector);
-				rulesVelocity.thisAddPoint(rule3Vector);
-				//rulesVelocity.add(rule4Vector);
+			// 	// Add velocities
+			// 	var rulesVelocity = new IgePoint(0, 0, 0);
+			// 	rulesVelocity.thisAddPoint(rule1Vector);
+			// 	rulesVelocity.thisAddPoint(rule2Vector);
+			// 	rulesVelocity.thisAddPoint(rule3Vector);
+			// 	//rulesVelocity.add(rule4Vector);
 				
-				this.velocity._velocity.thisAddPoint(rulesVelocity);
-			}
+			// 	this.velocity._velocity.thisAddPoint(rulesVelocity);
+			// }
 
 			this.limitVelocity();
+
+			// Apply friction
+			this.velocity._velocity.x *= this.friction;
+			this.velocity._velocity.y *= this.friction;
+			
+			if (Math.abs(this.velocity._velocity.x) < 0.0001) {
+				this.velocity._velocity.x = 0;
+			}
+
+			if (Math.abs(this.velocity._velocity.y) < 0.0001) {
+				this.velocity._velocity.y = 0;
+			}
+			//this.rotation *= this.friction;
 
 			// // 1. Find nearest target entity
 			// var targetEntity = this.findTargetEntityByType('Fighter', this._parent);
@@ -296,10 +340,14 @@ var Fighter = IgeEntity.extend({
 		// Magnitude (hypotenuse) of velocity
 		var velocity = Math.sqrt(this.velocity._velocity.x * this.velocity._velocity.x + this.velocity._velocity.y * this.velocity._velocity.y);
 
-		if (velocity > this.velocityLimit) {
-			this.velocity._velocity.x = (this.velocity._velocity.x/velocity) * this.velocityLimit;
-			this.velocity._velocity.y = (this.velocity._velocity.y/velocity) * this.velocityLimit;
+		if (velocity > this.maxVelocity) {
+			this.velocity._velocity.x = (this.velocity._velocity.x/velocity) * this.maxVelocity;
+			this.velocity._velocity.y = (this.velocity._velocity.y/velocity) * this.maxVelocity;
 		}
+
+		// if (this.rotation > this.maxRotation) {
+		// 	this.rotation = this.maxRotation;
+		// }
 	}
 });
 

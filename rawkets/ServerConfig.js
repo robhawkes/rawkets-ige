@@ -1,5 +1,7 @@
 var config = {
 	include: [
+		{name: 'IgeVector', path: './gameHelpers/IgeVector'},
+		{name: 'IgeSteerComponent', path: './gameComponents/IgeSteerComponent'},
 		{name: 'ServerNetworkEvents', path: './gameClasses/ServerNetworkEvents'},
 		{name: 'Player', path: './gameClasses/Player'},
 		{name: 'PlayerTurret', path: './gameClasses/PlayerTurret'},
