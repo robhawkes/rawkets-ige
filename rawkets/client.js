@@ -74,20 +74,20 @@ var Client = IgeClass.extend({
 							.stream.on('entityCreated', function (entity) {
 								self.log('Stream entity created with ID: ' + entity.id());
 
-								// Apply relevent groups
-								var group = "";
+								// Apply relevent category
+								var category = "";
 								
 								switch (entity.classId()) {
 									case "Player":
-										group = "EnemyPlayers";
+										category = "EnemyPlayers";
 										break;
 								}
 
-								if (group !== "") {
-									entity.group(group);
+								if (category !== "") {
+									entity.category(category);
 								}
 
-								// Apply texture now group is set
+								// Apply texture now category is set
 								entity.applyTexture();
 							});
 

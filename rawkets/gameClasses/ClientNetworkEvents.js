@@ -25,13 +25,13 @@ var ClientNetworkEvents = {
 					// Store reference to local player
 					self.localPlayer = ige.$(data);
 
-					// Set group for local player
-					self.localPlayer.group("LocalPlayers");
+					// Set category for local player
+					self.localPlayer.category("LocalPlayers");
 
-					// Apply texture now group is set
+					// Apply texture now category is set
 					self.localPlayer.applyTexture();
 
-					// Manually set group for local player so they're always on top
+					// Manually set depth for local player so they're always on top
 					self.localPlayer.depth(9999);
 
 					// Set local team

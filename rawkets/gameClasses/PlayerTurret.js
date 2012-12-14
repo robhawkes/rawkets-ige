@@ -79,8 +79,8 @@ var PlayerTurret = IgeEntity.extend({
 
 		if (!ige.isServer) {
 			// Find nearest enemy ship
-			var targetGroup = (this._parent.group() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
-			var targetEntity = this.findTargetEntityByType(targetGroup, this._parent);
+			var targetCategory = (this._parent.category() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
+			var targetEntity = this.findTargetEntityByType(targetCategory, this._parent);
 
 			if (targetEntity) {
 				// Rotate towards it if within range

@@ -6,9 +6,9 @@ var Fighter = IgeEntity.extend({
 	// Should these go somewhere else?
 	maxAcceleration: 0.0005,
 	maxVelocity: 0.1,
-	// maxAngularAcceleration: Math.radians(0.01),
-	// maxRotation: Math.radians(1),
-	// rotation: 0,
+	maxAngularAcceleration: Math.radians(0.01),
+	maxRotation: Math.radians(1),
+	rotation: 0,
 	friction: 0.96,
 
 	init: function (ownerId) {
@@ -18,10 +18,12 @@ var Fighter = IgeEntity.extend({
 
 		self.ownerId = ownerId;
 
-		self.group(self.classId());
+		self.category(self.classId());
 
 		if (ige.isServer) {
 			self.addComponent(IgeVelocityComponent);
+			//self.velocity.x(0.1);
+			//self.velocity.y(0.1);
 			//self.velocity.x(Math.random()*0.1 - 0.05);
 			//self.velocity.y(Math.random()*0.1 - 0.05);
 
@@ -89,24 +91,34 @@ var Fighter = IgeEntity.extend({
 			// Test steer component
 			// Seek
 			//var steering = this.steer.seek({position: new IgeVector(100, -100)});
+			// Flee
+			//var steering = this.steer.flee({position: new IgeVector(100, -100)});
 			// Arrive
-			//var steering = this.steer.arrive({position: new IgeVector(100, -100)});
+			var steering = this.steer.arrive({position: new IgeVector(100, -100)});
 			// Align
-			//var steering = this.steer.align({orientation: Math.radians(315)});
-			//console.log(steering.rotation);
+			//var steering = this.steer.align({orientation: Math.radians(95)});
+			// Align2
+			//var steering = this.steer.align2({orientation: Math.radians(90)});
+			//var steering = this.steer.align2({orientation: Math.radians(225)});
+			//var steering = this.steer.align2({orientation: Math.radians(315)});
 			// Velocity match
 			//var steering = this.steer.velocityMatch({velocity: new IgeVector(0.1, 0)});
 			// Pursue
 			//var steering = this.steer.pursue({velocity: new IgeVector(0.1, 0.1), position: new IgeVector(200, -200)});
+			//console.log(steering.velocity.x);
 			//var steering = this.steer.pursue({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
 			// Evade
-			var steering = this.steer.evade({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
+			//var steering = this.steer.evade({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
+			// Face
+			//var steering = this.steer.face({position: new IgeVector(200, -200)});
+			// Look where you're going
+			//var steering = this.steer.lookWhereYoureGoing();
 			
 			this.velocity._velocity.x += steering.velocity.x * ige._tickDelta;
 			this.velocity._velocity.y += steering.velocity.y * ige._tickDelta;
 
-			// this.rotation += steering.rotation * ige._tickDelta;
-			// this._rotate.z += this.rotation;
+			this.rotation += steering.rotation * ige._tickDelta;
+			this._rotate.z += this.rotation;
 
 			// Find all friendly fighters
 			// var friendlyFighters = this.findFriendlyFighters();
@@ -174,7 +186,12 @@ var Fighter = IgeEntity.extend({
 			if (Math.abs(this.velocity._velocity.y) < 0.0001) {
 				this.velocity._velocity.y = 0;
 			}
-			//this.rotation *= this.friction;
+			
+			this.rotation *= this.friction;
+
+			if (Math.abs(this.rotation) < 0.0001) {
+				this.rotation = 0;
+			}
 
 			// // 1. Find nearest target entity
 			// var targetEntity = this.findTargetEntityByType('Fighter', this._parent);
@@ -237,7 +254,7 @@ var Fighter = IgeEntity.extend({
 		var texture = ige.client.gameTextures.enemyFighter;
 
 		var owner = ige.$(this.ownerId);
-		if (owner.group() == "LocalPlayers") {
+		if (owner.category() == "LocalPlayers") {
 			texture = ige.client.gameTextures.localFighter;
 		}
 
@@ -345,9 +362,9 @@ var Fighter = IgeEntity.extend({
 			this.velocity._velocity.y = (this.velocity._velocity.y/velocity) * this.maxVelocity;
 		}
 
-		// if (this.rotation > this.maxRotation) {
-		// 	this.rotation = this.maxRotation;
-		// }
+		if (this.rotation > this.maxRotation) {
+			this.rotation = this.maxRotation;
+		}
 	}
 });
 

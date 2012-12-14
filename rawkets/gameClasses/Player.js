@@ -187,7 +187,7 @@ var Player = IgeEntity.extend({
 
 	initInput: function() {
 		var self = this;
-		if (self.group() == "LocalPlayers") {
+		if (self.category() == "LocalPlayers") {
 			// Listen for the mouse up event
 			ige.input.on('mouseUp', function (event, x, y, button) { self._mouseUp(event, x, y, button); });
 		}
@@ -208,7 +208,7 @@ var Player = IgeEntity.extend({
 	applyTexture: function() {
 		var texture = ige.client.gameTextures.enemyShip;
 
-		if (this.group() == "LocalPlayers") {
+		if (this.category() == "LocalPlayers") {
 			texture = ige.client.gameTextures.localShip;
 		}
 

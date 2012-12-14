@@ -79,8 +79,8 @@ var PlayerBullet = IgeEntity.extend({
 			this.velocity.byAngleAndPower(this._rotate.z + Math.radians(-90), 1);
 
 			// Check if within AABB of enemy for first-pass collision
-			var targetGroup = (this.owner.group() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
-			var entities = ige.$$(targetGroup);
+			var targetCategory = (this.owner.category() == 'LocalPlayers') ? 'EnemyPlayers' : 'LocalPlayers';
+			var entities = ige.$$(targetCategory);
 			var entityCount = entities.length;
 
 			// Loop through entities

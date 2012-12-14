@@ -1,3 +1,6 @@
+// Based on methods described within Artificial Intelligence for Games
+// http://ai4g.com
+
 var IgeSteerComponent = IgeClass.extend({
 	classId: 'IgeSteerComponent',
 	componentId: 'steer',
@@ -43,11 +46,11 @@ var IgeSteerComponent = IgeClass.extend({
 		var steering = new IgeSteerOutput();
 
 		// Get direction to target
-		steering.velocity = target.position.thisSubtract(this._kinematic.position);
+		steering.velocity = target.position.subtract(this._kinematic.position);
 
 		// Set velocity along this direction at full speed
-		steering.velocity.normalize();
-		steering.velocity.scale(this._entity.maxSpeed);
+		steering.velocity.thisNormalize();
+		steering.velocity.thisScale(this._entity.maxSpeed);
 
 		steering.rotation = 0;
 
@@ -58,11 +61,11 @@ var IgeSteerComponent = IgeClass.extend({
 		var steering = new IgeSteerOutput();
 
 		// Get direction to target
-		steering.velocity = target.position.thisSubtract(this._kinematic.position);
+		steering.velocity = target.position.subtract(this._kinematic.position);
 
 		// Set velocity along this direction at full speed
-		steering.velocity.normalize();
-		steering.velocity.scale(this._entity.maxAcceleration);
+		steering.velocity.thisNormalize();
+		steering.velocity.thisScale(this._entity.maxAcceleration);
 
 		steering.rotation = 0;
 
@@ -74,11 +77,11 @@ var IgeSteerComponent = IgeClass.extend({
 		var steering = new IgeSteerOutput();
 
 		// Get direction to target
-		steering.velocity = this._kinematic.position.thisSubtract(target.position);
+		steering.velocity = this._kinematic.position.subtract(target.position);
 
 		// Set velocity along this direction at full speed
-		steering.velocity.normalize();
-		steering.velocity.scale(this._entity.maxAcceleration);
+		steering.velocity.thisNormalize();
+		steering.velocity.thisScale(this._entity.maxAcceleration);
 
 		steering.rotation = 0;
 
@@ -98,7 +101,7 @@ var IgeSteerComponent = IgeClass.extend({
 		var steering = new IgeSteerOutput();
 
 		// Get direction to target
-		var direction = target.position.thisSubtract(this._kinematic.position);
+		var direction = target.position.subtract(this._kinematic.position);
 		var distance = direction.magnitude();
 
 		// Reached target, apply no steering
@@ -117,17 +120,17 @@ var IgeSteerComponent = IgeClass.extend({
 		}
 
 		var targetVelocity = direction;
-		targetVelocity.normalize();
-		targetVelocity.scale(targetSpeed);
+		targetVelocity.thisNormalize();
+		targetVelocity.thisScale(targetSpeed);
 
 		// Acceleration tries to get to target velocity
-		steering.velocity = targetVelocity.thisSubtract(this._kinematic.velocity);
-		steering.velocity.divide(timeToTarget);
+		steering.velocity = targetVelocity.subtract(this._kinematic.velocity);
+		steering.velocity.thisDivide(timeToTarget);
 
 		// Check if acceleration is too fast
 		if (steering.velocity.magnitude() > this._entity.maxAcceleration) {
-			steering.velocity.normalize();
-			steering.velocity.scale(this._entity.maxAcceleration);
+			steering.velocity.thisNormalize();
+			steering.velocity.thisScale(this._entity.maxAcceleration);
 		}
 
 		steering.rotation = 0;
@@ -194,6 +197,72 @@ var IgeSteerComponent = IgeClass.extend({
 		return steering;
 	},
 
+	align2: function(target) {
+		// Radius at which the entity has arrived
+		var targetRadius = Math.radians(5);
+		// Radius to begin slowing down
+		var slowRadius = Math.radians(20);
+
+		var rotation = this._entity.maxRotation;
+
+		// Time over which to achieve target speed
+		var timeToTarget = 0.1;
+
+		var agentOrientationAsVector = new IgeVector(Math.cos(this._kinematic.orientation), Math.sin(this._kinematic.orientation));
+		var targetOrientationAsVector = new IgeVector(Math.cos(target.orientation), Math.sin(target.orientation));
+
+		var angle = agentOrientationAsVector.angleTo(targetOrientationAsVector);
+		var distance = target.orientation - this._kinematic.orientation;
+
+		var steering = new IgeSteerOutput();
+
+		// Reached target, apply no steering
+		if (Math.abs(distance) < targetRadius) {
+			return steering;
+		}
+		
+		if (distance > Math.PI) {
+			distance -= Math.PI * 2;
+		}
+		
+		if (distance < -Math.PI) {
+			distance += Math.PI * 2;
+		}
+
+		if (angle < slowRadius) {
+			rotation *= angle / slowRadius;
+		}
+		
+		var direction = distance / Math.abs(distance);
+		
+		steering.rotation = rotation * direction;
+
+		// var targetRotation = 0;
+
+		// // Outside slow radius, apply full speed
+		// if (distance > slowRadius) {
+		// 	targetRotation = this._entity.maxRotation;
+		// // Otherwise calculate scaled speed
+		// } else {
+		// 	targetRotation = this._entity.maxRotation * (distance / slowRadius);
+		// }
+
+		// targetRotation *= angle / distance;
+
+		// // Acceleration tries to get to target rotation
+		// steering.rotation = targetRotation - this._kinematic.rotation;
+		// steering.rotation /= timeToTarget;
+
+		// // Check if acceleration is too fast
+		// var angularAcceleration = Math.abs(steering.rotation);
+		// if (angularAcceleration > this._entity.maxAngularAcceleration) {
+		// 	steering.rotation /= angularAcceleration;
+		// 	steering.rotation *= this._entity.maxAngularAcceleration;
+		// }
+
+		return steering;
+	},
+
 	velocityMatch: function(target) {
 		// Time over which to achieve target speed
 		var timeToTarget = 0.1;
@@ -201,13 +270,13 @@ var IgeSteerComponent = IgeClass.extend({
 		var steering = new IgeSteerOutput();
 
 		// Acceleration tries to get to target velocity
-		steering.velocity = target.velocity.thisSubtract(this._kinematic.velocity);
-		steering.velocity.divide(timeToTarget);
+		steering.velocity = target.velocity.subtract(this._kinematic.velocity);
+		steering.velocity.thisDivide(timeToTarget);
 
 		// Check if acceleration is too fast
 		if (steering.velocity.magnitude() > this._entity.maxAcceleration) {
-			steering.velocity.normalize();
-			steering.velocity.scale(this._entity.maxAcceleration);
+			steering.velocity.thisNormalize();
+			steering.velocity.thisScale(this._entity.maxAcceleration);
 		}
 
 		steering.rotation = 0;
@@ -215,11 +284,12 @@ var IgeSteerComponent = IgeClass.extend({
 		return steering;
 	},
 
+	// Use arrive instead of seek if entity is likely to be faster than (and catch up with) the target
 	pursue: function(target) {
 		var maxPredictionTime = 5;
 
 		// Get direction to target
-		var direction = target.position.thisSubtract(this._kinematic.position);
+		var direction = target.position.subtract(this._kinematic.position);
 		var distance = direction.magnitude();
 
 		// Get current speed
@@ -235,7 +305,7 @@ var IgeSteerComponent = IgeClass.extend({
 		}
 
 		var seekTarget = {position: target.position.clone()};
-		seekTarget.position.add(target.velocity.thisScale(prediction));
+		seekTarget.position.thisAdd(target.velocity.scale(prediction));
 
 		return this.seek(seekTarget);
 	},
@@ -244,7 +314,7 @@ var IgeSteerComponent = IgeClass.extend({
 		var maxPredictionTime = 5;
 
 		// Get direction to target
-		var direction = target.position.thisSubtract(this._kinematic.position);
+		var direction = target.position.subtract(this._kinematic.position);
 		var distance = direction.magnitude();
 
 		// Get current speed
@@ -259,22 +329,67 @@ var IgeSteerComponent = IgeClass.extend({
 			prediction = distance / speed;
 		}
 
-		var evadeTarget = {position: target.position.clone()};
-		evadeTarget.position.add(target.velocity.thisScale(prediction));
+		var fleeTarget = {position: target.position.clone()};
+		fleeTarget.position.thisAdd(target.velocity.thisScale(prediction));
 
-		return this.flee(evadeTarget);
+		return this.flee(fleeTarget);
 	},
 
 	face: function(target) {
+		// Get direction to target
+		var direction = target.position.subtract(this._kinematic.position);
 
+		// Check for zero direction, if so make no change
+		if (direction.magnitude() === 0) {
+			return new IgeSteerOutput();
+		}
+
+		var alignTarget = {orientation: Math.atan2(-direction.y, direction.x) + Math.radians(270)};
+		
+		return this.align(alignTarget);
 	},
 
 	lookWhereYoureGoing: function() {
+		// Check for zero direction, if so make no change
+		if (this._kinematic.velocity.magnitude() === 0) {
+			return new IgeSteerOutput();
+		}
 
+		// Otherwise, set target based on velocity
+		var alignTarget = {orientation: Math.atan2(-this._kinematic.velocity.y, this._kinematic.velocity.x) + Math.radians(270)};
+		
+		return this.align(alignTarget);
 	},
 
+	// Needs work
 	wander: function() {
+		// Forward offset of wander target circle
+		var wanderOffset = 50;
+		// Radius of wander target circle
+		var wanderRadius = 20;
+		// Maximum rate at which the wander orientation can change (in radians)
+		var wanderRate = 0.05;
+		// Current orientation of the wander target
+		var wanderOrientation = 0;
 
+		// Update wander orientation
+		wanderOrientation += this._randomBinomial() * wanderRate;
+
+		// Calculate the combined target orientation
+		var targetOrientation = wanderOrientation + this._kinematic.orientation;
+
+		// Calculate the centre of the wander circle
+		var target = this._kinematic.position.add(wanderOffset * this._kinematic.orientation.asVector());
+
+		// Calculate the target location
+		target.thisAdd(wanderRadius * targetOrientation.asVector());
+
+		var steering = this.face(target);
+
+		// Acceleration in direction of orientation
+		steering.velocity = maxAcceleration * this._kinematic.orientation.asVector();
+
+		return steering;
 	},
 
 	followPath: function(path) {
