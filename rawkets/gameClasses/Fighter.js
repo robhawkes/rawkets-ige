@@ -6,8 +6,8 @@ var Fighter = IgeEntity.extend({
 	// Should these go somewhere else?
 	maxAcceleration: 0.0005,
 	maxVelocity: 0.1,
-	maxAngularAcceleration: Math.radians(0.01),
-	maxRotation: Math.radians(1),
+	maxAngularAcceleration: Math.radians(0.02),
+	maxRotation: Math.radians(2),
 	rotation: 0,
 	friction: 0.96,
 
@@ -88,6 +88,8 @@ var Fighter = IgeEntity.extend({
 	tick: function (ctx) {
 		/* CEXCLUDE */
 		if (ige.isServer) {
+			// console.log(this._rotate.z);
+			// console.log(this.worldRotationZ());
 			// Test steer component
 			// Seek
 			//var steering = this.steer.seek({position: new IgeVector(100, -100)});
@@ -96,11 +98,11 @@ var Fighter = IgeEntity.extend({
 			// Arrive
 			var steering = this.steer.arrive({position: new IgeVector(100, -100)});
 			// Align
-			//var steering = this.steer.align({orientation: Math.radians(95)});
-			// Align2
-			//var steering = this.steer.align2({orientation: Math.radians(90)});
-			//var steering = this.steer.align2({orientation: Math.radians(225)});
-			//var steering = this.steer.align2({orientation: Math.radians(315)});
+			//var steering = this.steer.align({orientation: Math.radians(90)});
+			//var steering = this.steer.align({orientation: Math.radians(190)});
+			//var steering = this.steer.align({orientation: Math.radians(225)});
+			//var steering = this.steer.align({orientation: Math.radians(270)});
+			//var steering = this.steer.align({orientation: Math.radians(315)});
 			// Velocity match
 			//var steering = this.steer.velocityMatch({velocity: new IgeVector(0.1, 0)});
 			// Pursue
@@ -117,6 +119,7 @@ var Fighter = IgeEntity.extend({
 			this.velocity._velocity.x += steering.velocity.x * ige._tickDelta;
 			this.velocity._velocity.y += steering.velocity.y * ige._tickDelta;
 
+			//console.log("Delta rotation: " + Math.degrees(steering.rotation * ige._tickDelta));
 			this.rotation += steering.rotation * ige._tickDelta;
 			this._rotate.z += this.rotation;
 
