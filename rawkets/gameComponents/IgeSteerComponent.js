@@ -140,70 +140,11 @@ var IgeSteerComponent = IgeClass.extend({
 		return steering;
 	},
 
-	// Something wrong with this, when rotating left it misses the angle by 90 degrees
-	// My custom "rotate to target" logic for player ship movement could work here
-	// All it needs to do is rotate to the target angle with some fancy acceleration
-	// There is a potential solution in the getAngularSteering method of
-	// https://github.com/Denzen/Steering-behaviors-in-js-and-canvas/blob/master/js/behaviors.js
-	align2: function(target) {
-		// Radius at which the entity has arrived
-		var targetRadius = Math.radians(5);
-
-		// Radius to begin slowing down
-		var slowRadius = Math.radians(20);
-
-		// Time over which to achieve target speed
-		var timeToTarget = 0.1;
-
-		var steering = new IgeSteerOutput();
-
-		// Get direction to target
-		var rotation = target.orientation - this._kinematic.orientation;
-
-		//console.log(rotation);
-
-		// Map the result to the (-pi, pi) interval
-		rotation = this._mapToRange(rotation);
-		var rotationSize = Math.abs(rotation);
-
-		//console.log(rotation);
-
-		// Reached target, apply no steering
-		if (rotationSize < targetRadius) {
-			return steering;
-		}
-
-		var targetRotation = 0;
-
-		// Outside slow radius, apply full speed
-		if (rotationSize > slowRadius) {
-			targetRotation = this._entity.maxRotation;
-		// Otherwise calculate scaled speed
-		} else {
-			targetRotation = this._entity.maxRotation * (rotationSize / slowRadius);
-		}
-
-		targetRotation *= rotation / rotationSize;
-
-		// Acceleration tries to get to target rotation
-		steering.rotation = targetRotation - this._kinematic.rotation;
-		steering.rotation /= timeToTarget;
-
-		// Check if acceleration is too fast
-		var angularAcceleration = Math.abs(steering.rotation);
-		if (angularAcceleration > this._entity.maxAngularAcceleration) {
-			steering.rotation /= angularAcceleration;
-			steering.rotation *= this._entity.maxAngularAcceleration;
-		}
-
-		return steering;
-	},
-
 	align: function(target) {
 		// Radius at which the entity has arrived
 		var targetRadius = Math.radians(5);
 		// Radius to begin slowing down
-		var slowRadius = Math.radians(20);
+		var slowRadius = Math.radians(40);
 
 		//var rotation = this._entity.maxRotation;
 		//var rotation = 0;
@@ -369,7 +310,7 @@ var IgeSteerComponent = IgeClass.extend({
 		}
 
 		// Otherwise, set target based on velocity
-		var alignTarget = {orientation: Math.atan2(-this._kinematic.velocity.y, this._kinematic.velocity.x) + Math.radians(270)};
+		var alignTarget = {orientation: Math.atan2(-this._kinematic.velocity.y, this._kinematic.velocity.x)};
 		
 		return this.align(alignTarget);
 	},
@@ -377,11 +318,11 @@ var IgeSteerComponent = IgeClass.extend({
 	// Needs work
 	wander: function() {
 		// Forward offset of wander target circle
-		var wanderOffset = 50;
+		var wanderOffset = 40;
 		// Radius of wander target circle
 		var wanderRadius = 20;
 		// Maximum rate at which the wander orientation can change (in radians)
-		var wanderRate = 0.05;
+		var wanderRate = Math.degrees(5);
 		// Current orientation of the wander target
 		var wanderOrientation = 0;
 
@@ -390,17 +331,22 @@ var IgeSteerComponent = IgeClass.extend({
 
 		// Calculate the combined target orientation
 		var targetOrientation = wanderOrientation + this._kinematic.orientation;
+		//var targetOrientation = Math.radians(270);
+
+		// Find orientation vectors
+		var entityOrientationAsVector = new IgeVector(Math.cos(this._kinematic.orientation + Math.radians(270)), Math.sin(this._kinematic.orientation + Math.radians(270)));
+		var targetOrientationAsVector = new IgeVector(Math.cos(targetOrientation), Math.sin(targetOrientation));
 
 		// Calculate the centre of the wander circle
-		var target = this._kinematic.position.add(wanderOffset * this._kinematic.orientation.asVector());
+		var target = {position: this._kinematic.position.add(entityOrientationAsVector.scale(wanderOffset))};
 
 		// Calculate the target location
-		target.thisAdd(wanderRadius * targetOrientation.asVector());
+		target.position.thisAdd(targetOrientationAsVector.scale(wanderRadius));
 
 		var steering = this.face(target);
 
 		// Acceleration in direction of orientation
-		steering.velocity = maxAcceleration * this._kinematic.orientation.asVector();
+		steering.velocity = entityOrientationAsVector.scale(this._entity.maxAcceleration);
 
 		return steering;
 	},
@@ -437,6 +383,10 @@ var IgeSteerComponent = IgeClass.extend({
 		}
 
 		return angle;
+	},
+
+	_randomBinomial: function() {
+		return Math.random() - Math.random();
 	},
 
 	tick: function (ctx) {

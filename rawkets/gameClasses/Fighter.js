@@ -6,7 +6,9 @@ var Fighter = IgeEntity.extend({
 	// Should these go somewhere else?
 	maxAcceleration: 0.0005,
 	maxVelocity: 0.1,
-	maxAngularAcceleration: Math.radians(0.02),
+	// maxAngularAcceleration: Math.radians(0.01),
+	// maxRotation: Math.radians(1.5),
+	maxAngularAcceleration: Math.radians(0.05),
 	maxRotation: Math.radians(2),
 	rotation: 0,
 	friction: 0.96,
@@ -96,7 +98,7 @@ var Fighter = IgeEntity.extend({
 			// Flee
 			//var steering = this.steer.flee({position: new IgeVector(100, -100)});
 			// Arrive
-			var steering = this.steer.arrive({position: new IgeVector(100, -100)});
+			//var steering = this.steer.arrive({position: new IgeVector(100, -100)});
 			// Align
 			//var steering = this.steer.align({orientation: Math.radians(90)});
 			//var steering = this.steer.align({orientation: Math.radians(190)});
@@ -112,9 +114,11 @@ var Fighter = IgeEntity.extend({
 			// Evade
 			//var steering = this.steer.evade({velocity: new IgeVector(0, 0), position: new IgeVector(200, -200)});
 			// Face
-			//var steering = this.steer.face({position: new IgeVector(200, -200)});
+			//var steering = this.steer.face({position: new IgeVector(200, 200)});
 			// Look where you're going
 			//var steering = this.steer.lookWhereYoureGoing();
+			// Wander
+			var steering = this.steer.wander();
 			
 			this.velocity._velocity.x += steering.velocity.x * ige._tickDelta;
 			this.velocity._velocity.y += steering.velocity.y * ige._tickDelta;
@@ -192,7 +196,7 @@ var Fighter = IgeEntity.extend({
 			
 			this.rotation *= this.friction;
 
-			if (Math.abs(this.rotation) < 0.0001) {
+			if (Math.abs(this.rotation) < 0.001) {
 				this.rotation = 0;
 			}
 
