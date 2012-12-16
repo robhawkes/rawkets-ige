@@ -351,18 +351,46 @@ var IgeSteerComponent = IgeClass.extend({
 		return steering;
 	},
 
+	// Skipped for now, not needed
 	followPath: function(path) {
 
 	},
 
 	separation: function(targets) {
+		// Threshold to take action – target distance from entity
+		var threshold = 20;
 
+		// Constant coefficiant of decay for the inverse square law force
+		var decayCoefficient = 0.01; // Update this with actual value
+
+		var steering = new IgeSteerOutput();
+
+		for (var i = 0; i < targets.length; i++) {
+			var target = targets[i];
+
+			// Check if target is close
+			var direction = target.position.subtract(this._kinematic.position);
+			var distance = direction.magnitude();
+
+			if (distance < threshold) {
+				// Strength of repulsion
+				var strength = Math.min(decayCoefficient / (distance * distance), this._entity.maxAcceleration);
+
+				// Add the acceleration
+				direction.thisNormalize();
+				steering.velocity.thisAdd(direction.scale(strength));
+			}
+		}
+
+		return steering;
 	},
 
+	// Skipped for now, not needed
 	collisionAvoidance: function(targets) {
 
 	},
 
+	// Skipped for now, not needed
 	obstacleAvoidance: function() {
 
 	},

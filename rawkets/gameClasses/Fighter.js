@@ -24,12 +24,69 @@ var Fighter = IgeEntity.extend({
 
 		if (ige.isServer) {
 			self.addComponent(IgeVelocityComponent);
-			//self.velocity.x(0.1);
-			//self.velocity.y(0.1);
+			// self.velocity.x(0.1);
+			// self.velocity.y(0.1);
 			//self.velocity.x(Math.random()*0.1 - 0.05);
 			//self.velocity.y(Math.random()*0.1 - 0.05);
 
-			self.addComponent(IgeSteerComponent);
+			//self.addComponent(IgeSteerComponent);
+
+			self.addComponent(IgeSteeringComponent);
+
+			// var seekTarget = new IgeSteeringKinematic();
+			// seekTarget.position.x = 200;
+			// seekTarget.position.y = -200;
+			// this.steering.add(new IgeSteeringBehaviourSeek(this, [seekTarget], 1));
+
+			// var fleeTarget = new IgeSteeringKinematic();
+			// fleeTarget.position.x = 200;
+			// fleeTarget.position.y = -200;
+			// this.steering.add(new IgeSteeringBehaviourFlee(this, [fleeTarget], 1));
+
+			// var arriveTarget = new IgeSteeringKinematic();
+			// arriveTarget.position.x = 200;
+			// arriveTarget.position.y = -200;
+			// this.steering.add(new IgeSteeringBehaviourArrive(this, [arriveTarget], 1));
+
+			// var alignTarget = new IgeSteeringKinematic();
+			// alignTarget.orientation = Math.radians(270);
+			// this.steering.add(new IgeSteeringBehaviourAlign(this, [alignTarget], 1));
+
+			// var velocityMatchTarget = new IgeSteeringKinematic();
+			// velocityMatchTarget.velocity = new IgeVector(-0.1, 0.1);
+			// this.steering.add(new IgeSteeringBehaviourVelocityMatch(this, [velocityMatchTarget], 1));
+
+			// var pursueTarget = new IgeSteeringKinematic();
+			// pursueTarget.velocity = new IgeVector(1, 1);
+			// //pursueTarget.velocity = new IgeVector(0, 0);
+			// pursueTarget.position = new IgeVector(200, -200);
+			// this.steering.add(new IgeSteeringBehaviourPursue(this, [pursueTarget], 1));
+
+			// var evadeTarget = new IgeSteeringKinematic();
+			// evadeTarget.velocity = new IgeVector(1, 1);
+			// //evadeTarget.velocity = new IgeVector(0, 0);
+			// evadeTarget.position = new IgeVector(200, -200);
+			// this.steering.add(new IgeSteeringBehaviourEvade(this, [evadeTarget], 1));
+
+			// var faceTarget = new IgeSteeringKinematic();
+			// faceTarget.position = new IgeVector(200, 200);
+			// this.steering.add(new IgeSteeringBehaviourFace(this, [faceTarget], 1));
+
+			//this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 1));
+
+			this.steering.add(new IgeSteeringBehaviourWander(this, [], 1));
+
+			// var separationTargets = [];
+			
+			// var separationTarget1 = new IgeSteeringKinematic();
+			// separationTarget1.position = new IgeVector(-1, -1);
+			// separationTargets.push(separationTarget1);
+
+			// var separationTarget2 = new IgeSteeringKinematic();
+			// separationTarget2.position = new IgeVector(1, -1);
+			// separationTargets.push(separationTarget2);
+
+			// this.steering.add(new IgeSteeringBehaviourSeparation(this, separationTargets, 1));
 		}
 
 		if (!ige.isServer) {
@@ -118,7 +175,10 @@ var Fighter = IgeEntity.extend({
 			// Look where you're going
 			//var steering = this.steer.lookWhereYoureGoing();
 			// Wander
-			var steering = this.steer.wander();
+			// var steering = this.steer.wander();
+
+			// Blended steering
+			var steering = this.steering.getSteering();
 			
 			this.velocity._velocity.x += steering.velocity.x * ige._tickDelta;
 			this.velocity._velocity.y += steering.velocity.y * ige._tickDelta;

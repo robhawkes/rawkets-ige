@@ -157,7 +157,7 @@ var Player = IgeEntity.extend({
 			}
 
 			// Launch fighters
-			if (Date.now() - this.lastFighterTime > 1000) {
+			if (Date.now() - this.lastFighterTime > 10000) {
 				var fighter = new Fighter(this.id())
 					.width(6)
 					.height(8)
