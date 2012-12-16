@@ -4,14 +4,15 @@ var Fighter = IgeEntity.extend({
 	team: 0,
 
 	// Should these go somewhere else?
-	maxAcceleration: 0.0005,
+	maxAcceleration: 0.0003,
 	maxVelocity: 0.1,
 	// maxAngularAcceleration: Math.radians(0.01),
 	// maxRotation: Math.radians(1.5),
 	maxAngularAcceleration: Math.radians(0.05),
-	maxRotation: Math.radians(2),
+	maxRotation: Math.radians(3),
 	rotation: 0,
-	friction: 0.96,
+	friction: 0.98,
+	//friction: 1,
 
 	init: function (ownerId) {
 		this._super();
@@ -26,8 +27,8 @@ var Fighter = IgeEntity.extend({
 			self.addComponent(IgeVelocityComponent);
 			// self.velocity.x(0.1);
 			// self.velocity.y(0.1);
-			//self.velocity.x(Math.random()*0.1 - 0.05);
-			//self.velocity.y(Math.random()*0.1 - 0.05);
+			// self.velocity.x(Math.random()*0.6 - 0.3);
+			// self.velocity.y(Math.random()*0.6 - 0.3);
 
 			//self.addComponent(IgeSteerComponent);
 
@@ -74,7 +75,7 @@ var Fighter = IgeEntity.extend({
 
 			//this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 1));
 
-			this.steering.add(new IgeSteeringBehaviourWander(this, [], 1));
+			//this.steering.add(new IgeSteeringBehaviourWander(this, [], 1));
 
 			// var separationTargets = [];
 			
@@ -87,6 +88,12 @@ var Fighter = IgeEntity.extend({
 			// separationTargets.push(separationTarget2);
 
 			// this.steering.add(new IgeSteeringBehaviourSeparation(this, separationTargets, 1));
+
+			// Flocking
+			this.steering.add(new IgeSteeringBehaviourArrive(this, [new IgeSteeringKinematic()], 0.6));
+			this.steering.add(new IgeSteeringBehaviourSeparation(this, [new IgeSteeringKinematic()], 1));
+			this.steering.add(new IgeSteeringBehaviourVelocityMatch(this, [new IgeSteeringKinematic()], 0.3));
+			this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 0.5));
 		}
 
 		if (!ige.isServer) {
@@ -176,6 +183,53 @@ var Fighter = IgeEntity.extend({
 			//var steering = this.steer.lookWhereYoureGoing();
 			// Wander
 			// var steering = this.steer.wander();
+
+			// Update targets for flock
+			var friendlyFighters = this.findFriendlyFighters();
+			var friendlyFighterCount = friendlyFighters.length;
+			var flockDistance = 100;
+			var flockCount = 0;
+			if (friendlyFighterCount > 0) {
+				var flockTargets = [];
+				var flockCenter = new IgeSteeringKinematic();
+				var flockVelocity = new IgeSteeringKinematic();
+
+				for (var i = 0; i < friendlyFighterCount; i++) {
+					var friendlyFighter = friendlyFighters[i];
+					if (friendlyFighter.id() !== this.id()) {
+						var flockTarget = new IgeSteeringKinematic();
+						flockTarget.position.x = friendlyFighter._worldMatrix.matrix[2];
+						flockTarget.position.y = friendlyFighter._worldMatrix.matrix[5];
+
+						// Get distance to target
+						var distance = Math.distance(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5], this._worldMatrix.matrix[2], this._worldMatrix.matrix[5]);
+
+						// Skip if far from entity
+						// if (distance > flockDistance) {
+						// 	continue;
+						// }
+
+						flockCount++;
+
+						flockTargets.push(flockTarget);
+						
+						var positionAsVector = new IgeVector(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5]);
+						flockCenter.position.thisAdd(positionAsVector);
+
+						var velocityAsVector = new IgeVector(friendlyFighter.velocity._velocity.x, friendlyFighter.velocity._velocity.y);
+						flockVelocity.velocity.thisAdd(velocityAsVector);
+						// console.log(friendlyFighter.velocity._velocity.x);
+						// console.log(friendlyFighter.velocity._velocity.y);
+					}
+				}
+
+				flockCenter.position.thisDivide(flockCount);
+				flockVelocity.velocity.thisDivide(flockCount);
+
+				this.steering._behaviours[0].updateTargetKinematics([flockCenter]);
+				this.steering._behaviours[1].updateTargetKinematics(flockTargets);
+				this.steering._behaviours[2].updateTargetKinematics([flockVelocity]);
+			}
 
 			// Blended steering
 			var steering = this.steering.getSteering();

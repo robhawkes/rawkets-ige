@@ -157,11 +157,12 @@ var Player = IgeEntity.extend({
 			}
 
 			// Launch fighters
-			if (Date.now() - this.lastFighterTime > 10000) {
+			if (Date.now() - this.lastFighterTime > 1000) {
 				var fighter = new Fighter(this.id())
 					.width(6)
 					.height(8)
-					.translateTo(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], 0)
+					//.translateTo(this._worldMatrix.matrix[2], this._worldMatrix.matrix[5], 0)
+					.translateTo(this._worldMatrix.matrix[2] + (Math.random()*500-250), this._worldMatrix.matrix[5] + (Math.random()*500-250), 0)
 					//.rotateTo(this._parent._rotate.x + this._rotate.x, this._parent._rotate.y + this._rotate.y, this._parent._rotate.z + Math.random()*Math.radians(360))
 					.lifeSpan(10000)
 					.streamMode(1)

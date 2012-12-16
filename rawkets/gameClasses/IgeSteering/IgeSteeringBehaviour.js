@@ -28,6 +28,11 @@ var IgeSteeringBehaviour = IgeClass.extend({
 		this._entityKinematic.velocity.x = this._entity.velocity._velocity.x;
 		this._entityKinematic.velocity.y = this._entity.velocity._velocity.y;
 		this._entityKinematic.rotation = this._entity.rotation;
+	},
+
+	// Update target kinematics for behaviours with changing targets, like flocking
+	updateTargetKinematics: function(targetKinematics) {
+		this._targetKinematics = targetKinematics;
 	}
 });
 
