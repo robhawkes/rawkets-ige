@@ -5,7 +5,7 @@ var Fighter = IgeEntity.extend({
 
 	// Should these go somewhere else?
 	maxAcceleration: 0.0003,
-	maxVelocity: 0.1,
+	maxVelocity: 0.06,
 	// maxAngularAcceleration: Math.radians(0.01),
 	// maxRotation: Math.radians(1.5),
 	maxAngularAcceleration: Math.radians(0.05),
@@ -20,6 +20,7 @@ var Fighter = IgeEntity.extend({
 		var self = this;
 
 		self.ownerId = ownerId;
+		self.owner = ige.$(self.ownerId)
 
 		self.category(self.classId());
 
@@ -90,9 +91,28 @@ var Fighter = IgeEntity.extend({
 			// this.steering.add(new IgeSteeringBehaviourSeparation(this, separationTargets, 1));
 
 			// Flocking
-			this.steering.add(new IgeSteeringBehaviourArrive(this, [new IgeSteeringKinematic()], 0.6));
-			this.steering.add(new IgeSteeringBehaviourSeparation(this, [new IgeSteeringKinematic()], 1));
-			this.steering.add(new IgeSteeringBehaviourVelocityMatch(this, [new IgeSteeringKinematic()], 0.3));
+			// this.steering.add(new IgeSteeringBehaviourArrive(this, [new IgeSteeringKinematic()], 0.6));
+			// this.steering.add(new IgeSteeringBehaviourSeparation(this, [new IgeSteeringKinematic()], 1));
+			// this.steering.add(new IgeSteeringBehaviourVelocityMatch(this, [new IgeSteeringKinematic()], 0.3));
+			// this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 0.5));
+
+			// Wander but stay near parent ship (for now, assuming it's at 0,0)
+			// this.steering.add(new IgeSteeringBehaviourWander(this, [], 0.55));
+			// var arriveTarget = new IgeSteeringKinematic();
+			// arriveTarget.position.x = 0;
+			// arriveTarget.position.y = 0;
+			// this.steering.add(new IgeSteeringBehaviourArrive(this, [arriveTarget], 0.45));
+			// this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 1));
+
+			// Patrol around parent ship
+			var patrolTarget = new IgeSteeringKinematic();
+			patrolTarget.position.x = this.owner._worldMatrix.matrix[2];
+			patrolTarget.position.y = this.owner._worldMatrix.matrix[5];
+			this.patrolSteering = this.steering.add(new IgeSteeringBehaviourPatrolCircle(this, [patrolTarget], 1));
+			// For some reason this causes the fighters to spin around at the bottom left quadrant of the patrol
+			// Seems to happen when fighter passes from +x to -x, or perhaps even from +y to -y
+			// Happens when going in either direction, though doesn't show for anti-clockwise without moving parent ship around a bit
+			// Either that or the fighter is moving past the target and ends up spinning round while it's behind
 			this.steering.add(new IgeSteeringBehaviourLookAhead(this, [], 0.5));
 		}
 
@@ -185,51 +205,57 @@ var Fighter = IgeEntity.extend({
 			// var steering = this.steer.wander();
 
 			// Update targets for flock
-			var friendlyFighters = this.findFriendlyFighters();
-			var friendlyFighterCount = friendlyFighters.length;
-			var flockDistance = 100;
-			var flockCount = 0;
-			if (friendlyFighterCount > 0) {
-				var flockTargets = [];
-				var flockCenter = new IgeSteeringKinematic();
-				var flockVelocity = new IgeSteeringKinematic();
+			// var friendlyFighters = this.findFriendlyFighters();
+			// var friendlyFighterCount = friendlyFighters.length;
+			// var flockDistance = 100;
+			// var flockCount = 0;
+			// if (friendlyFighterCount > 0) {
+			// 	var flockTargets = [];
+			// 	var flockCenter = new IgeSteeringKinematic();
+			// 	var flockVelocity = new IgeSteeringKinematic();
 
-				for (var i = 0; i < friendlyFighterCount; i++) {
-					var friendlyFighter = friendlyFighters[i];
-					if (friendlyFighter.id() !== this.id()) {
-						var flockTarget = new IgeSteeringKinematic();
-						flockTarget.position.x = friendlyFighter._worldMatrix.matrix[2];
-						flockTarget.position.y = friendlyFighter._worldMatrix.matrix[5];
+			// 	for (var i = 0; i < friendlyFighterCount; i++) {
+			// 		var friendlyFighter = friendlyFighters[i];
+			// 		if (friendlyFighter.id() !== this.id()) {
+			// 			var flockTarget = new IgeSteeringKinematic();
+			// 			flockTarget.position.x = friendlyFighter._worldMatrix.matrix[2];
+			// 			flockTarget.position.y = friendlyFighter._worldMatrix.matrix[5];
 
-						// Get distance to target
-						var distance = Math.distance(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5], this._worldMatrix.matrix[2], this._worldMatrix.matrix[5]);
+			// 			// Get distance to target
+			// 			var distance = Math.distance(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5], this._worldMatrix.matrix[2], this._worldMatrix.matrix[5]);
 
-						// Skip if far from entity
-						// if (distance > flockDistance) {
-						// 	continue;
-						// }
+			// 			// Skip if far from entity
+			// 			// if (distance > flockDistance) {
+			// 			// 	continue;
+			// 			// }
 
-						flockCount++;
+			// 			flockCount++;
 
-						flockTargets.push(flockTarget);
+			// 			flockTargets.push(flockTarget);
 						
-						var positionAsVector = new IgeVector(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5]);
-						flockCenter.position.thisAdd(positionAsVector);
+			// 			var positionAsVector = new IgeVector(friendlyFighter._worldMatrix.matrix[2], friendlyFighter._worldMatrix.matrix[5]);
+			// 			flockCenter.position.thisAdd(positionAsVector);
 
-						var velocityAsVector = new IgeVector(friendlyFighter.velocity._velocity.x, friendlyFighter.velocity._velocity.y);
-						flockVelocity.velocity.thisAdd(velocityAsVector);
-						// console.log(friendlyFighter.velocity._velocity.x);
-						// console.log(friendlyFighter.velocity._velocity.y);
-					}
-				}
+			// 			var velocityAsVector = new IgeVector(friendlyFighter.velocity._velocity.x, friendlyFighter.velocity._velocity.y);
+			// 			flockVelocity.velocity.thisAdd(velocityAsVector);
+			// 			// console.log(friendlyFighter.velocity._velocity.x);
+			// 			// console.log(friendlyFighter.velocity._velocity.y);
+			// 		}
+			// 	}
 
-				flockCenter.position.thisDivide(flockCount);
-				flockVelocity.velocity.thisDivide(flockCount);
+			// 	flockCenter.position.thisDivide(flockCount);
+			// 	flockVelocity.velocity.thisDivide(flockCount);
 
-				this.steering._behaviours[0].updateTargetKinematics([flockCenter]);
-				this.steering._behaviours[1].updateTargetKinematics(flockTargets);
-				this.steering._behaviours[2].updateTargetKinematics([flockVelocity]);
-			}
+			// 	this.steering._behaviours[0].updateTargetKinematics([flockCenter]);
+			// 	this.steering._behaviours[1].updateTargetKinematics(flockTargets);
+			// 	this.steering._behaviours[2].updateTargetKinematics([flockVelocity]);
+			// }
+
+			// Update patrol steering target
+			var patrolTarget = this.patrolSteering._targetKinematics[0];
+			patrolTarget.position.x = Math.floor(this.owner._worldMatrix.matrix[2]);
+			patrolTarget.position.y = Math.floor(this.owner._worldMatrix.matrix[5]);
+			//this.patrolSteering.updateTargetKinematics([patrolTarget]);
 
 			// Blended steering
 			var steering = this.steering.getSteering();

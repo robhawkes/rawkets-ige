@@ -21,7 +21,8 @@ var config = {
 		{name: 'IgeSteeringBehaviourFace', path: './gameClasses/IgeSteering/IgeSteeringBehaviourFace'},
 		{name: 'IgeSteeringBehaviourLookAhead', path: './gameClasses/IgeSteering/IgeSteeringBehaviourLookAhead'},
 		{name: 'IgeSteeringBehaviourWander', path: './gameClasses/IgeSteering/IgeSteeringBehaviourWander'},
-		{name: 'IgeSteeringBehaviourSeparation', path: './gameClasses/IgeSteering/IgeSteeringBehaviourSeparation'}
+		{name: 'IgeSteeringBehaviourSeparation', path: './gameClasses/IgeSteering/IgeSteeringBehaviourSeparation'},
+		{name: 'IgeSteeringBehaviourPatrolCircle', path: './gameClasses/IgeSteering/IgeSteeringBehaviourPatrolCircle'}
 	]
 };
 

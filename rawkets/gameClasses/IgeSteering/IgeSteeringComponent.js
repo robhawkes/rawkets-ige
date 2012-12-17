@@ -1,3 +1,6 @@
+// TODO
+// - Add ability to store and retrieve behaviours by a unique name/id (id returned when behaviour is added)
+// - Add ability to change and update behaviour targets
 var IgeSteeringComponent = IgeClass.extend({
 	classId: 'IgeSteeringComponent',
 	componentId: 'steering',
@@ -10,6 +13,9 @@ var IgeSteeringComponent = IgeClass.extend({
 	// Add steering behaviour
 	add: function(behaviour) {
 		this._behaviours.push(behaviour);
+		return behaviour;
+
+		// Return unique behaviour id
 	},
 
 	// Get steering output
