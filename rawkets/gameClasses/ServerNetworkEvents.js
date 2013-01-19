@@ -14,6 +14,14 @@ var ServerNetworkEvents = {
 
 	_onPlayerDisconnect: function (clientId) {
 		if (ige.server.players[clientId]) {
+			// Destroy player's fighters
+			var fighterArr = ige.$$$(ige.server.players[clientId].id()),
+				arrCount = fighterArr.length;
+			
+			while (arrCount--) {
+				fighterArr[arrCount].destroy();
+			}
+			
 			// Remove the player from the game
 			ige.server.players[clientId].destroy();
 
@@ -28,6 +36,8 @@ var ServerNetworkEvents = {
 			ige.server.players[clientId] = new Player(clientId)
 				.streamMode(1)
 				.mount(ige.server.scene1);
+			
+			console.log('Created player with ID:' + ige.server.players[clientId].id());
 
 			// Tell the client to track their player entity
 			ige.network.send('playerEntity', ige.server.players[clientId].id(), clientId);
