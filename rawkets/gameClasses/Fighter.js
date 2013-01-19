@@ -20,7 +20,7 @@ var Fighter = IgeEntity.extend({
 		var self = this;
 
 		self.ownerId = ownerId;
-		self.owner = ige.$(self.ownerId)
+		self.owner = ige.$(self.ownerId);
 
 		self.category(self.classId());
 

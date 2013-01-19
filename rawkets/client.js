@@ -138,12 +138,12 @@ var Client = IgeClass.extend({
 
 						// Create an IgeUiTimeStream entity that will allow us to "visualise" the
 						// timestream data being interpolated by the player entity
-						self.tsVis = new IgeUiTimeStream()
-							.height(140)
-							.width(400)
-							.top(0)
-							.center(0)
-							.mount(self.uiScene);
+						// self.tsVis = new IgeUiTimeStream()
+						// 	.height(140)
+						// 	.width(400)
+						// 	.top(0)
+						// 	.center(0)
+						// 	.mount(self.uiScene);
 
 						self.custom1 = {
 							name: 'Delta',
